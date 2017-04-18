@@ -8,6 +8,8 @@
 #include "forest/ForestTrainers.h"
 #include "forest/ForestPredictors.h"
 
+// NOW LOCALLY LINEAR FOREST BINDINGS
+
 // [[Rcpp::export]]
 Rcpp::List regression_train(Rcpp::NumericMatrix input_data,
                             size_t outcome_index,
@@ -27,9 +29,10 @@ Rcpp::List regression_train(Rcpp::NumericMatrix input_data,
                             unsigned int ci_group_size) {
   Data* data = RcppUtilities::convert_data(input_data, sparse_data, variable_names);
 
-  ForestTrainer trainer = ForestTrainers::regression_trainer(data, outcome_index);
+  ForestTrainer trainer = ForestTrainers::locally_linear_trainer(data, outcome_index, covariates_index, lambda);
   RcppUtilities::initialize_trainer(trainer, mtry, num_trees, num_threads, min_node_size,
       sample_with_replacement, sample_fraction, no_split_variables, seed, honesty, ci_group_size);
+  
   Forest forest = trainer.train(data);
 
   Rcpp::List result;
@@ -52,7 +55,7 @@ Rcpp::NumericMatrix regression_predict(Rcpp::List forest,
   Forest deserialized_forest = RcppUtilities::deserialize_forest(
       forest[RcppUtilities::SERIALIZED_FOREST_KEY]);
 
-  ForestPredictor predictor = ForestPredictors::regression_predictor(4);
+  ForestPredictor predictor = ForestPredictors::locally_linear_predictor(num_threads, 1); // was of 4; why?
   std::vector<Prediction> predictions = predictor.predict(deserialized_forest, data);
   Rcpp::NumericMatrix result = RcppUtilities::create_prediction_matrix(predictions);
 
@@ -70,7 +73,7 @@ Rcpp::NumericMatrix regression_predict_oob(Rcpp::List forest,
   Forest deserialized_forest = RcppUtilities::deserialize_forest(
       forest[RcppUtilities::SERIALIZED_FOREST_KEY]);
 
-  ForestPredictor predictor = ForestPredictors::regression_predictor(4);
+  ForestPredictor predictor = ForestPredictors::locally_linear_predictor(num_threads, 1);
   std::vector<Prediction> predictions = predictor.predict_oob(deserialized_forest, data);
   Rcpp::NumericMatrix result = RcppUtilities::create_prediction_matrix(predictions);
 
