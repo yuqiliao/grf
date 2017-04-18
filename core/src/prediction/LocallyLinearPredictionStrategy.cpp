@@ -32,7 +32,6 @@ LocallyLinearRelabelingStrategy::LocallyLinearPredictionStrategy(double lambda):
 lambda(lambda) {}
 
 Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
-                                                    //const std::vector<std::vector<size_t>> &leaf_sampleIDs,
                                                     const std::unordered_map<size_t, double>& weights_by_sampleID,
                                                     const Observations& observations) {
     
