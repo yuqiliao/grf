@@ -86,3 +86,21 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
     
     return Prediction(predictions);
 }
+
+// now defining dummy methods to see if the compiler stops complaining to me about pure virtual methods
+
+Prediction LocallyLinearPredictionStrategy::predict_with_variance(size_t sampleID,
+                                                    const std::vector<std::vector<size_t>>& leaf_sampleIDs
+                                                    const std::unordered_map<size_t, double>& weights_by_sampleID,
+                                                    const Observations& observations) {
+    throw std::runtime_error("Variance estimates are not yet implemented.");
+}
+
+bool LocallyLinearPredictionStrategy::requires_leaf_sample_IDs(){
+    return false;
+}
+
+PredictionValues precompute_prediction_values(const std::vector<std::vector<size_t>> leaf_sampleIDs),
+                                              const Observations& observations){
+    throw std::runtime_error("Not implemented yet.")
+}

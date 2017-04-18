@@ -33,6 +33,18 @@ public:
                        const Data *data,
                        const std::unordered_map<size_t, double>& weights_by_sampleID,
                        const Observations& observations);
+    
+    Prediction predict_with_variance(size_t sampleID,
+                                     const std::vector<std::vector<size_t>>& leaf_sampleIDs,
+                                     const Observations& observations,
+                                     uint ci_group_size);
+    
+    bool  requires_leaf_sampleIDs();
+    
+    PredictionValues precompute_prediction_values(const std::vector<std::vector<size_t>>& leaf_sampleIDs,
+                                                  const Observations& observations);
+    
+    
 private:
     double lambda;
 };
