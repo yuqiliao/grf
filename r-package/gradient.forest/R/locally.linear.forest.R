@@ -1,6 +1,6 @@
 locally.linear.forest <- function(X,Y,sample.fraction = 0.5, mtry = ceiling(ncol(X)/3), 
                                   num.trees = 500, num.threads = NULL, min.node.size = NULL, keep.inbag = FALSE, 
-                                  honesty = TRUE, ci.group.size = 2, seed = NULL) {
+                                  honesty = TRUE, ci.group.size = 2, seed = NULL, lambda=0.01) {
   sparse.data <- as.matrix(0)
   
   if (is.null(mtry)) {
@@ -45,7 +45,7 @@ locally.linear.forest <- function(X,Y,sample.fraction = 0.5, mtry = ceiling(ncol
   
   forest <- locally_linear_train(input.data, outcome.index.zeroindexed, sparse.data,
                              variable.names, mtry, num.trees, verbose, num.threads, min.node.size, sample.with.replacement, 
-                             keep.inbag, sample.fraction, no.split.variables, seed, honesty, ci.group.size)
+                             keep.inbag, sample.fraction, no.split.variables, seed, honesty, ci.group.size, lambda)
   
   forest[["original.data"]] <- input.data
   class(forest) <- "regression.forest"
@@ -68,10 +68,10 @@ predict.locally.linear.forest <- function(forest, newdata = NULL, num.threads = 
   if (!is.null(newdata)) {
     input.data <- as.matrix(cbind(newdata, NA))
     locally_linear_predict(forest.short, input.data, sparse.data, variable.names,
-                       num.threads)
+                       num.threads, lambda)
   } else {
     input.data <- forest[["original.data"]]
     locally_linear_predict_oob(forest.short, input.data, sparse.data, variable.names,
-                           num.threads)
+                           num.threads, lambda)
   }
 }

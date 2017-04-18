@@ -29,6 +29,10 @@ public:
                                             const std::vector<double>& quantiles);
 
   static ForestPredictor regression_predictor(uint num_threads);
+    
+  static ForestPredictor locally_linear_predicotr(uint num_threads,
+                                                  double lambda,
+                                                  std::vector<std::vector<double>> input_data);
 };
 
 

@@ -26,7 +26,8 @@ Rcpp::List locally_linear_train(Rcpp::NumericMatrix input_data,
                             std::vector<size_t> no_split_variables,
                             unsigned int seed,
                             bool honesty,
-                            unsigned int ci_group_size) {
+                            unsigned int ci_group_size,
+                            double lambda) {
   Data* data = RcppUtilities::convert_data(input_data, sparse_data, variable_names);
 
   ForestTrainer trainer = ForestTrainers::locally_linear_trainer(data, outcome_index, lambda);
@@ -50,8 +51,7 @@ Rcpp::NumericMatrix locally_linear_predict(Rcpp::List forest,
                                        Rcpp::NumericMatrix input_data,
                                        Rcpp::RawMatrix sparse_data,
                                        std::vector<std::string> variable_names,
-                                       unsigned int num_threads,
-                                       std::vector<std::vector<double>> input_data) {
+                                       unsigned int num_threads) {
   Data *data = RcppUtilities::convert_data(input_data, sparse_data, variable_names);
   Forest deserialized_forest = RcppUtilities::deserialize_forest(
       forest[RcppUtilities::SERIALIZED_FOREST_KEY]);

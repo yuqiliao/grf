@@ -70,7 +70,6 @@ ForestTrainer ForestTrainers::regression_trainer(Data* data,
 
 ForestTrainer ForestTrainers::locally_linear_trainer(Data* data,
                                                    size_t outcome_index,
-                                                   //size_t covariates_index,
                                                    double lambda) {
     std::unordered_map<size_t, size_t> observables = {
         {Observations::OUTCOME, outcome_index}};

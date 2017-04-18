@@ -68,10 +68,10 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
     Eigen::Matrix<float, n, n> J = Id;
     J(0,0) = 0;
     
-    Eigen::Matrix<float, n, n> M = X.transpose()*X + J*lambda;
+    Eigen::Matrix<float, n, n> M = X.transpose()*weights*X + J*lambda;
     Eigen::Matrix<float, n, n> M.inverse = M.colPivHouseholderQr().solve(Id);
     
-    theta = M*X.transpose()*Y;
+    theta = M*X.transpose()*weights*Y;
     
     size_t num_input_points = input_data.size();
     Eigen::Matrix<double, num_input_points, p> input_data_eigen;

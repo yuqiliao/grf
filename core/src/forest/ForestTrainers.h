@@ -32,6 +32,9 @@ public:
                                         const std::vector<double>& quantiles);
   static ForestTrainer regression_trainer(Data* data,
                                           size_t outcome_index);
+  static ForestTrainer locally_linear_trainer(Data*data,
+                                              size_t outcome_index,
+                                              double lambda);
 };
 
 
