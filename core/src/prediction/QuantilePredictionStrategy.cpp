@@ -33,7 +33,8 @@ size_t QuantilePredictionStrategy::prediction_length() {
 Prediction QuantilePredictionStrategy::predict(size_t sampleID,
                                                const std::vector<double>& average_prediction_values,
                                                const std::unordered_map<size_t, double>& weights_by_sampleID,
-                                               const Observations& observations) {
+                                               const Observations& observations,
+                                               const Data *data) {
   std::vector<std::pair<size_t, double>> sampleIDs_and_values;
   for (auto it = weights_by_sampleID.begin(); it != weights_by_sampleID.end(); ++it) {
     size_t sampleID = it->first;

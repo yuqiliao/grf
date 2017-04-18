@@ -20,19 +20,19 @@
 #ifndef GRADIENTFOREST_LOCALLYLINEARRELABELINGSTRATEGY_H
 #define GRADIENTFOREST_LOCALLYLINEARRELABELINGSTRATEGY_H
 
-##include <unordered_map>
+#include <unordered_map>
 #include <vector>
 #include "commons/Observations.h"
 #include "tree/Tree.h"
 #include "relabeling/RelabelingStrategy.h"
 
-class LocallyLinearStrategy: public RelabelingStrategy {
+class LocallyLinearRelabelingStrategy: public RelabelingStrategy {
 public:
-    LocallyLinearStrategy();
+    LocallyLinearRelabelingStrategy();
     
-    LocallyLinearStrategy(double lambda);
+    LocallyLinearRelabelingStrategy(double lambda);
     
-    std::unordered_map<size_t, double> relabel_outcomes(
+    std::unordered_map<size_t, double> relabel_outcomes(const Data *data,
                                                         const Observations& observations,
                                                         const std::vector<size_t>& node_sampleIDs);
     

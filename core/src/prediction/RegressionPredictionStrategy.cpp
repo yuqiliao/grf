@@ -28,7 +28,8 @@ size_t RegressionPredictionStrategy::prediction_length() {
 Prediction RegressionPredictionStrategy::predict(size_t sampleID,
                                                  const std::vector<double>& averages,
                                                  const std::unordered_map<size_t, double>& weights_by_sampleID,
-                                                 const Observations& observations) {
+                                                 const Observations& observations,
+                                                 const Data *data) {
   std::vector<double> predictions = { averages.at(OUTCOME) };
   return Prediction(predictions);
 }

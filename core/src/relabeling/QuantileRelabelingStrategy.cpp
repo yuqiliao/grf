@@ -24,6 +24,7 @@ QuantileRelabelingStrategy::QuantileRelabelingStrategy(const std::vector<double>
     quantiles(quantiles) {}
 
 std::unordered_map<size_t, double> QuantileRelabelingStrategy::relabel_outcomes(
+    const Data *data,
     const Observations& observations,
     const std::vector<size_t>& node_sampleIDs) {
 

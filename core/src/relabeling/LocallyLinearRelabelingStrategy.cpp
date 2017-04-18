@@ -3,6 +3,7 @@
  #-------------------------------------------------------------------------------*/
 
 #include "utility.h"
+#include "eigen3/Eigen/Dense"
 #include "LocallyLinearRelabelingStrategy.h"
 
 LocallyLinearRelabelingStrategy::LocallyLinearRelabelingStrategy():
@@ -12,13 +13,13 @@ LocallyLinearRelabelingStrategy::LocallyLinearRelabelingStrategy(double lambda):
     lambda(lambda) {}
 
 
-std::unordered_map<size_t, double> LocallyLinearRelabelingStrategy::relabel_outcomes(
+std::unordered_map<size_t, double> LocallyLinearRelabelingStrategy::relabel_outcomes(const Data *data,
                                                                                      const Observations& observations,
                                                                                      const std::vector<size_t>& node_sampleIDs) {
     
     // find number of samples and covariates
-    size_t num_samples = node_sampleIDs.size();
-    size_t p = observations.get(Observations::COVARIATES,1).size()
+    const size_t num_samples = node_sampleIDs.size();
+    const size_t p = &data.get_num_cols(); // check on usage
    
     // initialize theta
     Eigen::Matrix<double, p, 1> theta;
@@ -29,8 +30,11 @@ std::unordered_map<size_t, double> LocallyLinearRelabelingStrategy::relabel_outc
     
     int i = 0;
     for (size_t sampleID : node_sampleIDs) {
-        Eigen::RowVectorXf row = observations.get(Observations::COVARIATES, sampleID);
-        X.block<1,p>(i, 0) << row;
+        for(size_t j; j<p; ++j){
+            X.block<1,1>(i,j) << &data.get(i,j)
+        }
+        // Eigen::RowVectorXf row = observations.get(Observations::COVARIATES, sampleID);
+        // X.block<1,p>(i, 0) << row;
         Y(i) << observations.get(Observations::OUTCOME, sampleID);
         ++i;
     }
@@ -51,7 +55,7 @@ std::unordered_map<size_t, double> LocallyLinearRelabelingStrategy::relabel_outc
     std::unordered_map<size_t, double> relabeled_observations;
     for (size_t sampleID : node_sampleIDs) {
         double response = observations.get(Observations::OUTCOME, sampleID);
-        std::vector<double> xi = observations.get(Observations::COVARIATES, sampleID);
+        std::vector<double> xi = X.block<1,p>(sampleID,0);
         
         rho << M_inverse*(Y-theta*xi);
         relabeled_observations[sampleID] = rho;

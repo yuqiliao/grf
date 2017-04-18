@@ -25,6 +25,7 @@ InstrumentalRelabelingStrategy::InstrumentalRelabelingStrategy(double split_regu
   split_regularization(split_regularization) {}
 
 std::unordered_map<size_t, double> InstrumentalRelabelingStrategy::relabel_outcomes(
+    const Data *data,
     const Observations& observations,
     const std::vector<size_t>& node_sampleIDs) {
 
