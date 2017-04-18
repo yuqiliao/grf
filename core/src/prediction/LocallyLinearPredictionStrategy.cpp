@@ -32,7 +32,8 @@ LocallyLinearRelabelingStrategy::LocallyLinearPredictionStrategy(double lambda):
 lambda(lambda) {}
 
 Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
-                                                    std::vector<std::vector<double>> input_data,
+                                                    const Data *data,
+                                                    //double lambda,
                                                     const std::unordered_map<size_t, double>& weights_by_sampleID,
                                                     const Observations& observations) {
     
@@ -73,10 +74,12 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
     
     theta = M*X.transpose()*weights*Y;
     
-    size_t num_input_points = input_data.size();
+    size_t num_input_points = Data::num_rows(data); // usage?
     Eigen::Matrix<double, num_input_points, p> input_data_eigen;
     for(size_t i=0; i<num_input_points; ++i){
-        input_data_eigen.block<1,p>(i,0) = input_data[i];
+        for(size_t j=0; j<p; ++j){
+            input_data_eigen.block<1,1>(i,j) = data.get(i,j);
+        }
     }
     Eigen::Matrix<double,num_input_points,1> predictions = input_data_eigen.transpose()*theta;
     

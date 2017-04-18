@@ -27,11 +27,10 @@
 class LocallyLinearPredictionStrategy: public PredictionStrategy {
 public:
     static const std::size_t OUTCOME;
-    static const std::size_t COVARIATES;
     
     size_t prediction_length();
     Prediction predict(size_t sampleID,
-                       std::vector<std::vector<double>> input_data,
+                       const Data *data,
                        const std::unordered_map<size_t, double>& weights_by_sampleID,
                        const Observations& observations);
 private:
