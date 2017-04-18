@@ -52,14 +52,15 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
     
     // we now move on to the local linear prediction assuming X has been formatted correctly
     
-    size_t p = observations.get(Observations::COVARIATES,1).size() // double check this method
+    size_t p = Data::num_cols(data); // double check this method
     Eigen::Matrix<float, n, p> X;
     Eigen::Matrix<float, n, 1> Y;
     
     // loop through observations to fill in X, Y
     for(size_t i=0; i<n; ++i){
-        Eigen::Matrix<float, 1, p> temp_row = observations.get(Observations::COVARIATES, i);
-        X.block<1,p>(i,0) = temp_row;
+        for(size_t j=0; j<p; ++j){
+            X.block<1,1>(i,j) = data.get(i,j);
+        }
         Y[i] = observations.get(Observations::OUTCOME, i);
     }
     
