@@ -24,6 +24,8 @@
 #include "relabeling/QuantileRelabelingStrategy.h"
 #include "prediction/QuantilePredictionStrategy.h"
 #include "relabeling/NoopRelabelingStrategy.h"
+#include "relabeling/LocallyLinearRelabelingStrategy.h"
+#include "prediction/LocallyLinearPredictionStrategy.h"
 
 ForestTrainer ForestTrainers::instrumental_trainer(Data* data,
                                                    size_t outcome_index,

@@ -19,6 +19,7 @@
 #include "prediction/InstrumentalPredictionStrategy.h"
 #include "prediction/QuantilePredictionStrategy.h"
 #include "prediction/RegressionPredictionStrategy.h"
+#include "prediction/LocallyLinearPredictionStrategy.h"
 
 ForestPredictor ForestPredictors::instrumental_predictor(uint num_threads,
                                                          uint ci_group_size) {
