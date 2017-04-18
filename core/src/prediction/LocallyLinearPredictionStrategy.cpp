@@ -31,37 +31,31 @@ lambda(0.01) {}
 LocallyLinearRelabelingStrategy::LocallyLinearPredictionStrategy(double lambda):
 lambda(lambda) {}
 
-Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID, // is this the test point?
-                                                    const std::vector<std::vector<size_t>> &leaf_sampleIDs, // note: vector of vectors
+Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
+                                                    //const std::vector<std::vector<size_t>> &leaf_sampleIDs,
+                                                    const std::unordered_map<size_t, double>& weights_by_sampleID,
                                                     const Observations& observations) {
     
-    size_t num_leaves = leaf_sampleIDs.size() // number of trees, or number of leaves containing x0?
-    size_t n = observations.size() // Waiting to hear from Julie that this method exists here
+    size_t n = observations.get_num_samples() // usage correct?
     
-    // initialize weight matrix of 0's; we'll update the diagonal
+    // initialize weight matrix
     Eigen::Matrix<float, n, n> weights = Eigen::Matrix<float, n, n>::Zero();
     
-    for(size_t i=0; i<leaf_sampleIDs.size(); ++i){
-        size_t leaf_size = leaf_sampleIDs[i].size(); //size of current leaf
-        size_t denominator = leaf_size*num_leaves;
-        if(leaf_size == 0){
-            continue;
-        }
-        for(auto& sampleID : leaf_sampleIDs[i]){
-            // are sampleIDs in 1...n ? ALL of this code assumes yes so must double check.
-            weights(sampleID, sampleID) += 1 / denominator;
-        }
+    
+    // loop through all leaves and update weight matrix
+    for (auto it = weights_by_sampleID.begin(); it != weights_by_sampleID.end(); ++it){
+        size_t i = it->first;
+        float weight = it->second;
+        weights(i,i) = weight;
     }
     
-    // we now have a complete diagonal weight matrix weights
-    // we now move on to the local linear prediction
-    // currently assuming X has been centered already
+    // we now move on to the local linear prediction assuming X has been formatted correctly
     
     size_t p = observations.get(Observations::COVARIATES,1).size() // double check this method
     Eigen::Matrix<float, n, p> X;
     Eigen::Matrix<float, n, 1> Y;
     
-    // loop through observations to fill in p, X, Y
+    // loop through observations to fill in X, Y
     for(size_t i=0; i<n; ++i){
         Eigen::Matrix<float, 1, p> temp_row = observations.get(Observations::COVARIATES, i);
         X.block<1,p>(i,0) = temp_row;

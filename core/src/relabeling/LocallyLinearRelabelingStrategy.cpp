@@ -16,36 +16,34 @@ std::unordered_map<size_t, double> LocallyLinearRelabelingStrategy::relabel_outc
                                                                                      const Observations& observations,
                                                                                      const std::vector<size_t>& node_sampleIDs) {
     
-    size_t num_samples = node_sampleIDs.size(); // is there a reason Julie didn't do this earlier to get num_samples?
-    
-    // find number of covariates: is there a cleaner way?? ********
-    Eigen::RowVectorXf observation;
-    observation << myMap.begin()->second;
-    const size_t num_covariates = observation.size(); // assuming we already have the vector of 1s, this includes the constant
-    
-    Eigen::Matrix<double, num_covariates, 1> theta;
+    // find number of samples and covariates
+    size_t num_samples = node_sampleIDs.size();
+    size_t p = observations.get(Observations::COVARIATES,1).size()
+   
+    // initialize theta
+    Eigen::Matrix<double, p, 1> theta;
     
     // extract matrix X  and vector Y
-    Eigen::Matrix<double, num_samples, num_covariates> X = Eigen::Matrix<double, num_samples, num_covariates>::Zero();
+    Eigen::Matrix<double, num_samples, p> X = Eigen::Matrix<double, num_samples, p>::Zero();
     Eigen::Matrix<double, num_samples, 1> Y = Eigen::Matrix<double, num_samples, 1>::Zero();
     
     int i = 0;
     for (size_t sampleID : node_sampleIDs) {
         Eigen::RowVectorXf row = observations.get(Observations::COVARIATES, sampleID);
-        X.block<1,num_covariates>(i, 0) << row;
+        X.block<1,p>(i, 0) << row;
         Y(i) << observations.get(Observations::OUTCOME, sampleID);
         ++i;
     }
     
     // Identity matrix
-    Eigen::Matrix<double, num_covariates, num_covariates> Id = Eigen::Matrix<double, num_covariates, num_covariates>::Identity();
+    Eigen::Matrix<double, p, p> Id = Eigen::Matrix<double, p, p>::Identity();
     
-    Eigen::Matrix<double, num_covariates, num_covariates> J = Id;
+    Eigen::Matrix<double, p, p> J = Id;
     J(0,0) = 0;
     
     // Pre-compute ridged variance estimate and its inverse
-    Eigen::Matrix<double, num_covariates, num_covariates> M = X.transpose()*X + J*lambda;
-    Eigen::Matrix<double, num_covariates, num_covariates> M_inverse = M.colPivHouseholderQr().solve(Id);
+    Eigen::Matrix<double, p, p> M = X.transpose()*X + J*lambda;
+    Eigen::Matrix<double, p, p> M_inverse = M.colPivHouseholderQr().solve(Id);
     
     theta = M*X.transpose()*Y;
     
