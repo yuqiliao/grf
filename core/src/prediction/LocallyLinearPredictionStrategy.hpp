@@ -31,7 +31,8 @@ public:
     
     size_t prediction_length();
     Prediction predict(size_t sampleID,
-                       const std::vector<std::vector<size_t>> &leaf_sampleIDs,
+                       std::vector<std::vector<double>> input_data,
+                       const std::unordered_map<size_t, double>& weights_by_sampleID,
                        const Observations& observations);
 private:
     double lambda;

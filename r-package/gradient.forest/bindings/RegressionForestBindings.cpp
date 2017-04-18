@@ -11,7 +11,7 @@
 // NOW LOCALLY LINEAR FOREST BINDINGS
 
 // [[Rcpp::export]]
-Rcpp::List regression_train(Rcpp::NumericMatrix input_data,
+Rcpp::List locally_linear_train(Rcpp::NumericMatrix input_data,
                             size_t outcome_index,
                             Rcpp::RawMatrix sparse_data,
                             std::vector <std::string> variable_names,
@@ -46,16 +46,17 @@ Rcpp::List regression_train(Rcpp::NumericMatrix input_data,
 }
 
 // [[Rcpp::export]]
-Rcpp::NumericMatrix regression_predict(Rcpp::List forest,
+Rcpp::NumericMatrix locally_linear_predict(Rcpp::List forest,
                                        Rcpp::NumericMatrix input_data,
                                        Rcpp::RawMatrix sparse_data,
                                        std::vector<std::string> variable_names,
-                                       unsigned int num_threads) {
+                                       unsigned int num_threads,
+                                       std::vector<std::vector<double>> input_data) {
   Data *data = RcppUtilities::convert_data(input_data, sparse_data, variable_names);
   Forest deserialized_forest = RcppUtilities::deserialize_forest(
       forest[RcppUtilities::SERIALIZED_FOREST_KEY]);
 
-  ForestPredictor predictor = ForestPredictors::locally_linear_predictor(num_threads, 1); // was of 4; why?
+  ForestPredictor predictor = ForestPredictors::locally_linear_predictor(num_threads, 1, input_data); // was of 4; why?
   std::vector<Prediction> predictions = predictor.predict(deserialized_forest, data);
   Rcpp::NumericMatrix result = RcppUtilities::create_prediction_matrix(predictions);
 
@@ -64,7 +65,7 @@ Rcpp::NumericMatrix regression_predict(Rcpp::List forest,
 }
 
 // [[Rcpp::export]]
-Rcpp::NumericMatrix regression_predict_oob(Rcpp::List forest,
+Rcpp::NumericMatrix locally_linear_predict_oob(Rcpp::List forest,
                                            Rcpp::NumericMatrix input_data,
                                            Rcpp::RawMatrix sparse_data,
                                            std::vector<std::string> variable_names,
