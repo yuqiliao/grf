@@ -38,73 +38,103 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
                                                     const Observations& observations,
                                                     const Data *data) {
     
-    int n = observations.get_num_samples(); // usage correct?
-    int p = data->num_cols; // () or not?
+    Data input_data;
+    input_data = *data;
+    
+    size_t n;
+    size_t p;
+    n = observations.get_num_samples(); // usage correct?
+    //p = data->get_num_cols(); // () or not?
+    p = observations.get(Observations::NUM_COVARIATES,1); // is the 1 gonna be right?
     
     // initialize weight matrix
-    Eigen::Matrix<float, n, n> weights = Eigen::Matrix<float, n, n>::Zero();
-    
+    Eigen::MatrixXf weights(n,n);
     
     // loop through all leaves and update weight matrix
     for (auto it = weights_by_sampleID.begin(); it != weights_by_sampleID.end(); ++it){
         size_t i = it->first;
         float weight = it->second;
-        weights(i,i) << weight;
+        weights(i,i) = weight;
     }
     
     // we now move on to the local linear prediction assuming X has been formatted correctly
     
     //size_t p = Data::num_cols(data); // double check this method
-    Eigen::Matrix<float, n, p> X;
-    Eigen::Matrix<float, n, 1> Y;
+    Eigen::MatrixXf X(n,p);
+    Eigen::MatrixXf Y(n,1);
     
-    // loop through observations to fill in X, Y
+    // loop through observations to fill in X, Y, weights
     for(size_t i=0; i<n; ++i){
         for(size_t j=0; j<p; ++j){
-            X.block<1,1>(i,j) << data->get(i,j);
+            //X.block<1,1>(i,j) << data->get(i,j);
+            //X.block<1,1>(i,j) = input_data.get(i,j);
+            X(i,j) = input_data.get(i,j);
+            if(i != j){
+                weights(i,j) = 0;
+            }
         }
         Y.block<1,1>(i,0) << observations.get(Observations::OUTCOME, i);
     }
     
     // Pre-compute M = X^T X + lambda J
     float lambda = 0.01;
-    Eigen::Matrix<float, p, p> Id = Eigen::Matrix<float, n, n>::Identity();
-    
-    Eigen::Matrix<float, p, p> J = Id;
+    Eigen::MatrixXf J(p,p);
+    Eigen::MatrixXf Id(p,p);
+    J = Eigen::MatrixXf::Identity(p,p);
+    Id = Eigen::MatrixXf::Identity(p,p);
     J(0,0) = 0;
     
-    Eigen::Matrix<float, p, p> M = X.transpose()*weights*X + J*lambda;
-    Eigen::Matrix<float, p, p> M_inverse = M.colPivHouseholderQr().solve(Id);
+    Eigen::MatrixXf M(p,p);
+    M = X.transpose()*weights*X + J*lambda;
+    Eigen::MatrixXf M_inverse(p,p);
+    M_inverse = M.colPivHouseholderQr().solve(Id);
     
-    Eigen::Matrix<float, 1, p> theta = M_inverse*X.transpose()*weights*Y;
+    Eigen::MatrixXf theta(1,p);
+    theta = M_inverse*X.transpose()*weights*Y;
+    
+    std::vector<double> theta_vector;
+    for(size_t i=1; i<p; ++i){
+        theta_vector[i] = theta(i);
+    }
     
     // fill in new data matrix
-    int num_input_points = data->num_rows(); // usage correct?
-    Eigen::Matrix<double, num_input_points, p> input_data_eigen;
+    // NEW DATA?????
+    
+    /*
+    size_t num_input_points;
+    num_input_points = data->num_rows(); // usage correct?
+    Eigen::MatrixXd input_data_eigen(num_input_points,p);
     for(size_t i=0; i<num_input_points; ++i){
         for(size_t j=0; j<p; ++j){
-            input_data_eigen.block<1,1>(i,j) << data->get(i,j);
+            input_data_eigen.block<1,1>(i,j) = data->get(i,j);
         }
     }
-    Eigen::Matrix<double,num_input_points,1> predictions = input_data_eigen.transpose()*theta;
+     
+    std::vector<double> predictions;
+    predictions = input_data_eigen.transpose()*theta;
+     */
     
-    return Prediction(predictions);
+    //std::vector<double> predictions;
+    //predictions = average_prediction_values.at(sampleID); // is this only working for points in original sample?????
+    
+    //return Prediction(predictions);
+    return Prediction(theta_vector); // trying this
 }
 
 // now defining dummy methods to see if the compiler stops complaining to me about pure virtual methods
 
 Prediction LocallyLinearPredictionStrategy::predict_with_variance(size_t sampleID,
-                                                                  const std::vector<std::vector<size_t>>& leaf_sampleIDs
+                                                                  const std::vector<std::vector<size_t>>& leaf_sampleIDs,
                                                                   const std::unordered_map<size_t, double>& weights_by_sampleID,
                                                                   const Observations& observations) {
     throw std::runtime_error("Variance estimates are not yet implemented.");
 }
 
-bool LocallyLinearPredictionStrategy::requires_leaf_sample_IDs(){
+bool LocallyLinearPredictionStrategy::requires_leaf_sampleIDs(){
     return false;
 }
 
-PredictionValues precompute_prediction_values(const std::vector<std::vector<size_t>> leaf_sampleIDs),
+PredictionValues precompute_prediction_values(const std::vector<std::vector<size_t>> leaf_sampleIDs,
                                               const Observations& observations){
     throw std::runtime_error("Not implemented yet.");
 }

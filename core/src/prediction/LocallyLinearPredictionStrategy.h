@@ -27,6 +27,7 @@
 class LocallyLinearPredictionStrategy: public PredictionStrategy {
 public:
     static const std::size_t OUTCOME;
+    static const std::size_t NUM_COVARIATES;
 
     size_t prediction_length();
     Prediction predict(size_t sampleID,
