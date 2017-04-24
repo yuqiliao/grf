@@ -34,7 +34,6 @@ public:
                                           size_t outcome_index);
   static ForestTrainer locally_linear_trainer(Data* data,
                                               size_t outcome_index,
-                                              size_t num_covariates,
                                               double lambda);
 };
 

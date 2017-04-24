@@ -35,8 +35,7 @@ size_t LocallyLinearPredictionStrategy::prediction_length() {
 Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
                                                     const std::vector<double>& average_prediction_values,
                                                     const std::unordered_map<size_t, double>& weights_by_sampleID,
-                                                    const Observations& observations,
-                                                    const Data *data) {
+                                                    const Observations& observations) {
     
     Data input_data;
     input_data = *data;
@@ -44,8 +43,7 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
     size_t n;
     size_t p;
     n = observations.get_num_samples(); // usage correct?
-    //p = data->get_num_cols(); // () or not?
-    p = observations.get(Observations::NUM_COVARIATES,1); // is the 1 gonna be right?
+    p = input_data->get_num_cols(); // use correct?
     
     // initialize weight matrix
     Eigen::MatrixXf weights(n,n);
@@ -97,28 +95,7 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
         theta_vector[i] = theta(i);
     }
     
-    // fill in new data matrix
-    // NEW DATA?????
-    
-    /*
-    size_t num_input_points;
-    num_input_points = data->num_rows(); // usage correct?
-    Eigen::MatrixXd input_data_eigen(num_input_points,p);
-    for(size_t i=0; i<num_input_points; ++i){
-        for(size_t j=0; j<p; ++j){
-            input_data_eigen.block<1,1>(i,j) = data->get(i,j);
-        }
-    }
-     
-    std::vector<double> predictions;
-    predictions = input_data_eigen.transpose()*theta;
-     */
-    
-    //std::vector<double> predictions;
-    //predictions = average_prediction_values.at(sampleID); // is this only working for points in original sample?????
-    
-    //return Prediction(predictions);
-    return Prediction(theta_vector); // trying this
+    return Prediction(theta_vector); // do not have test point yet; returning theta for now instead
 }
 
 // now defining dummy methods to see if the compiler stops complaining to me about pure virtual methods

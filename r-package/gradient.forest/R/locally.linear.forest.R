@@ -67,11 +67,15 @@ predict.locally.linear.forest <- function(forest, newdata = NULL, num.threads = 
   
   if (!is.null(newdata)) {
     input.data <- as.matrix(cbind(newdata, NA))
-    locally_linear_predict(forest.short, input.data, sparse.data, variable.names,
+    theta <- locally_linear_predict(forest.short, input.data, sparse.data, variable.names,
                        num.threads, lambda)
+    theta
+    # do things with theta
   } else {
     input.data <- forest[["original.data"]]
-    locally_linear_predict_oob(forest.short, input.data, sparse.data, variable.names,
+    theta <- locally_linear_predict_oob(forest.short, input.data, sparse.data, variable.names,
                            num.threads, lambda)
+    theta
+    # do things with theta
   }
 }

@@ -70,15 +70,12 @@ ForestTrainer ForestTrainers::regression_trainer(Data* data,
 
 ForestTrainer ForestTrainers::locally_linear_trainer(Data* data,
                                                    size_t outcome_index,
-                                                   size_t num_covariates,
                                                    double lambda) {
-    std::unordered_map<size_t, size_t> observables = {
-        {Observations::OUTCOME, outcome_index},
-        {Observations::NUM_COVARIATES, num_covariates}};
+    std::unordered_map<size_t, size_t> observables = {{Observations::OUTCOME, outcome_index}};
     
-    std::shared_ptr<RelabelingStrategy> relabeling_strategy(new LocallyLinearRelabelingStrategy(lambda));
+    std::shared_ptr<RelabelingStrategy> relabeling_strategy(new LocallyLinearRelabelingStrategy(lambda, data));
     std::shared_ptr<SplittingRuleFactory> splitting_rule_factory(new RegressionSplittingRuleFactory(data));
-    std::shared_ptr<PredictionStrategy> prediction_strategy(new LocallyLinearPredictionStrategy()); // should need lambda?? hmmmmm
+    std::shared_ptr<PredictionStrategy> prediction_strategy(new LocallyLinearPredictionStrategy(lambda, data)); // should need lambda?? hmmmmm
     
     return ForestTrainer(observables, relabeling_strategy, splitting_rule_factory, prediction_strategy);
 }

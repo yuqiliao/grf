@@ -13,8 +13,7 @@ LocallyLinearRelabelingStrategy::LocallyLinearRelabelingStrategy(double lambda):
     lambda(lambda) {}
 
 
-std::unordered_map<size_t, double> LocallyLinearRelabelingStrategy::relabel_outcomes(const Data *data,
-                                                                                     const Observations& observations,
+std::unordered_map<size_t, double> LocallyLinearRelabelingStrategy::relabel_outcomes(const Observations& observations,
                                                                                      const std::vector<size_t>& node_sampleIDs) {
     
     // find number of samples and covariates

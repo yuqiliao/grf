@@ -30,8 +30,7 @@ public:
   Prediction predict(size_t sampleID,
                      const std::vector<double>& averages,
                      const std::unordered_map<size_t, double>& weights_by_sampleID,
-                     const Observations& observations,
-                     const Data *data);
+                     const Observations& observations);
 
   Prediction predict_with_variance(
       size_t sampleID,

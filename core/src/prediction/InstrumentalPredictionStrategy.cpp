@@ -38,8 +38,7 @@ size_t InstrumentalPredictionStrategy::prediction_length() {
 Prediction InstrumentalPredictionStrategy::predict(size_t sampleID,
                                                    const std::vector<double>& averages,
                                                    const std::unordered_map<size_t, double>& weights_by_sampleID,
-                                                   const Observations& observations,
-                                                   const Data *data) {
+                                                   const Observations& observations) {
   double instrument_effect = averages.at(OUTCOME_INSTRUMENT) - averages.at(OUTCOME) * averages.at(INSTRUMENT);
   double first_stage = averages.at(TREATMENT_INSTRUMENT) - averages.at(TREATMENT) * averages.at(INSTRUMENT);
 
