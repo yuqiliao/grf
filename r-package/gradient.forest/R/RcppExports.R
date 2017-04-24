@@ -25,8 +25,8 @@ quantile_predict_oob <- function(forest, quantiles, input_data, sparse_data, var
     .Call('gradient_forest_quantile_predict_oob', PACKAGE = 'gradient.forest', forest, quantiles, input_data, sparse_data, variable_names, num_threads)
 }
 
-locally_linear_train <- function(input_data, outcome_index, sparse_data, variable_names, mtry, num_trees, verbose, num_threads, min_node_size, sample_with_replacement, keep_inbag, sample_fraction, no_split_variables, seed, honesty, ci_group_size, lambda, num_covariates) {
-    .Call('gradient_forest_locally_linear_train', PACKAGE = 'gradient.forest', input_data, outcome_index, sparse_data, variable_names, mtry, num_trees, verbose, num_threads, min_node_size, sample_with_replacement, keep_inbag, sample_fraction, no_split_variables, seed, honesty, ci_group_size, lambda, num_covariates)
+locally_linear_train <- function(input_data, outcome_index, sparse_data, variable_names, mtry, num_trees, verbose, num_threads, min_node_size, sample_with_replacement, keep_inbag, sample_fraction, no_split_variables, seed, honesty, ci_group_size, lambda) {
+    .Call('gradient_forest_locally_linear_train', PACKAGE = 'gradient.forest', input_data, outcome_index, sparse_data, variable_names, mtry, num_trees, verbose, num_threads, min_node_size, sample_with_replacement, keep_inbag, sample_fraction, no_split_variables, seed, honesty, ci_group_size, lambda)
 }
 
 locally_linear_predict <- function(forest, input_data, sparse_data, variable_names, num_threads, lambda) {

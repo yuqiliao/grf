@@ -125,8 +125,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // locally_linear_train
-Rcpp::List locally_linear_train(Rcpp::NumericMatrix input_data, size_t outcome_index, Rcpp::RawMatrix sparse_data, std::vector <std::string> variable_names, unsigned int mtry, unsigned int num_trees, bool verbose, unsigned int num_threads, unsigned int min_node_size, bool sample_with_replacement, bool keep_inbag, double sample_fraction, std::vector<size_t> no_split_variables, unsigned int seed, bool honesty, unsigned int ci_group_size, double lambda, size_t num_covariates);
-RcppExport SEXP gradient_forest_locally_linear_train(SEXP input_dataSEXP, SEXP outcome_indexSEXP, SEXP sparse_dataSEXP, SEXP variable_namesSEXP, SEXP mtrySEXP, SEXP num_treesSEXP, SEXP verboseSEXP, SEXP num_threadsSEXP, SEXP min_node_sizeSEXP, SEXP sample_with_replacementSEXP, SEXP keep_inbagSEXP, SEXP sample_fractionSEXP, SEXP no_split_variablesSEXP, SEXP seedSEXP, SEXP honestySEXP, SEXP ci_group_sizeSEXP, SEXP lambdaSEXP, SEXP num_covariatesSEXP) {
+Rcpp::List locally_linear_train(Rcpp::NumericMatrix input_data, size_t outcome_index, Rcpp::RawMatrix sparse_data, std::vector <std::string> variable_names, unsigned int mtry, unsigned int num_trees, bool verbose, unsigned int num_threads, unsigned int min_node_size, bool sample_with_replacement, bool keep_inbag, double sample_fraction, std::vector<size_t> no_split_variables, unsigned int seed, bool honesty, unsigned int ci_group_size, double lambda);
+RcppExport SEXP gradient_forest_locally_linear_train(SEXP input_dataSEXP, SEXP outcome_indexSEXP, SEXP sparse_dataSEXP, SEXP variable_namesSEXP, SEXP mtrySEXP, SEXP num_treesSEXP, SEXP verboseSEXP, SEXP num_threadsSEXP, SEXP min_node_sizeSEXP, SEXP sample_with_replacementSEXP, SEXP keep_inbagSEXP, SEXP sample_fractionSEXP, SEXP no_split_variablesSEXP, SEXP seedSEXP, SEXP honestySEXP, SEXP ci_group_sizeSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -147,8 +147,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type honesty(honestySEXP);
     Rcpp::traits::input_parameter< unsigned int >::type ci_group_size(ci_group_sizeSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< size_t >::type num_covariates(num_covariatesSEXP);
-    rcpp_result_gen = Rcpp::wrap(locally_linear_train(input_data, outcome_index, sparse_data, variable_names, mtry, num_trees, verbose, num_threads, min_node_size, sample_with_replacement, keep_inbag, sample_fraction, no_split_variables, seed, honesty, ci_group_size, lambda, num_covariates));
+    rcpp_result_gen = Rcpp::wrap(locally_linear_train(input_data, outcome_index, sparse_data, variable_names, mtry, num_trees, verbose, num_threads, min_node_size, sample_with_replacement, keep_inbag, sample_fraction, no_split_variables, seed, honesty, ci_group_size, lambda));
     return rcpp_result_gen;
 END_RCPP
 }
