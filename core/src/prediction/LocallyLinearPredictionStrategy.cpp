@@ -114,7 +114,8 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
 
 Prediction LocallyLinearPredictionStrategy::predict_with_variance(size_t sampleID,
                                                                   const std::vector<std::vector<size_t>>& leaf_sampleIDs,
-                                                                  const Observations& observations) {
+                                                                  const Observations& observations,
+                                                                  uint ci_group_size) {
     throw std::runtime_error("Variance estimates are not yet implemented.");
 }
 
