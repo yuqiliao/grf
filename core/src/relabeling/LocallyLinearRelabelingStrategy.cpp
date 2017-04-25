@@ -26,7 +26,7 @@ std::unordered_map<size_t, double> LocallyLinearRelabelingStrategy::relabel_outc
     
     int i = 0;
     for (size_t sampleID : node_sampleIDs) {
-        for(size_t j; j<p; ++j){
+        for(size_t j=0; j<p; ++j){
             X(i,j) = data->get(i,j);
         }
         // Eigen::RowVectorXf row = observations.get(Observations::COVARIATES, sampleID);
