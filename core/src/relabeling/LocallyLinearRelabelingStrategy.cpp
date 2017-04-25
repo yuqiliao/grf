@@ -17,47 +17,58 @@ std::unordered_map<size_t, double> LocallyLinearRelabelingStrategy::relabel_outc
                                                                                      const std::vector<size_t>& node_sampleIDs) {
     
     // find number of samples and covariates
-    const size_t num_samples = node_sampleIDs.size();
-    const size_t p = data->get_num_cols(); // check on usage
+    size_t num_samples = node_sampleIDs.size();
+    size_t p = data->get_num_cols(); // check on usage
    
     // initialize theta
-    Eigen::Matrix<double, p, 1> theta;
-    
-    // extract matrix X  and vector Y
-    Eigen::Matrix<double, num_samples, p> X = Eigen::Matrix<double, num_samples, p>::Zero();
-    Eigen::Matrix<double, num_samples, 1> Y = Eigen::Matrix<double, num_samples, 1>::Zero();
+    Eigen::MatrixXf X(num_samples, p);
+    Eigen::MatrixXf Y(num_samples,1);
     
     int i = 0;
     for (size_t sampleID : node_sampleIDs) {
         for(size_t j; j<p; ++j){
-            X.block<1,1>(i,j) << data->get(i,j)
+            X(i,j) = data->get(i,j);
         }
         // Eigen::RowVectorXf row = observations.get(Observations::COVARIATES, sampleID);
         // X.block<1,p>(i, 0) << row;
-        Y(i) << observations.get(Observations::OUTCOME, sampleID);
+        Y(i) = observations.get(Observations::OUTCOME, sampleID);
         ++i;
     }
     
     // Identity matrix
-    Eigen::Matrix<double, p, p> Id = Eigen::Matrix<double, p, p>::Identity();
+    Eigen::MatrixXf Id(p,p);
+    Eigen::MatrixXf J(p,p);
     
-    Eigen::Matrix<double, p, p> J = Id;
+    Id = Eigen::MatrixXf::Identity(p,p);
+    J = Eigen::MatrixXf::Identity(p,p);
     J(0,0) = 0;
     
+    
+    Eigen::MatrixXf theta(p,1);
+    
     // Pre-compute ridged variance estimate and its inverse
-    Eigen::Matrix<double, p, p> M = X.transpose()*X + J*lambda;
-    Eigen::Matrix<double, p, p> M_inverse = M.colPivHouseholderQr().solve(Id);
+    Eigen::MatrixXf M(p,p);
+    Eigen::MatrixXf M_inverse(p,p);
+    M = X.transpose()*X + J*lambda;
+    M_inverse = M.colPivHouseholderQr().solve(Id);
     
-    theta = M*X.transpose()*Y;
+    theta = M_inverse*X.transpose()*Y;
     
-    double rho;
     std::unordered_map<size_t, double> relabeled_observations;
     for (size_t sampleID : node_sampleIDs) {
         double response = observations.get(Observations::OUTCOME, sampleID);
-        std::vector<double> xi = X.block<1,p>(sampleID,0);
+        Eigen::MatrixXf xi(1,p);
+        xi = X.block(1,p,sampleID,0);
+    
+        Eigen::MatrixXf temp(1,1);
+        temp = xi*theta;
         
-        rho << M_inverse*(Y-theta*xi);
-        relabeled_observations[sampleID] = rho;
+        double difference;
+        difference = response-temp(1);
+        
+        Eigen::MatrixXf rho(p,1);
+        rho = M_inverse*xi.transpose()*difference;
+        relabeled_observations[sampleID] = rho(1);
     }
     return relabeled_observations;
 }

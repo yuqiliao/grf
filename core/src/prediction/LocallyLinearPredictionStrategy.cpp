@@ -99,7 +99,7 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
     Eigen::MatrixXf M_inverse(p,p);
     M_inverse = M.colPivHouseholderQr().solve(Id);
     
-    Eigen::MatrixXf theta(1,p);
+    Eigen::MatrixXf theta(p,1); // dimensions ok??
     theta = M_inverse*X.transpose()*weights*Y;
     
     std::vector<double> theta_vector;

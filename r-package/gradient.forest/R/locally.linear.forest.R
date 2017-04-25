@@ -69,7 +69,11 @@ predict.locally.linear.forest <- function(forest, newdata = NULL, num.threads = 
     input.data <- as.matrix(cbind(newdata, NA))
     theta <- locally_linear_predict(forest.short, input.data, sparse.data, variable.names,
                        num.threads, lambda)
-    theta
+    
+    
+    # assume newdata looks okay
+    new_matrix <- as.matrix(newdata) # assume inputed with 1s, can fix later
+    return(t(new_matrix) %*% theta)
     # do things with theta
   } else {
     input.data <- forest[["original.data"]]
@@ -77,5 +81,6 @@ predict.locally.linear.forest <- function(forest, newdata = NULL, num.threads = 
                            num.threads, lambda)
     theta
     # do things with theta
+    # NOT YET IMPLEMENTED 
   }
 }

@@ -29,10 +29,6 @@
 
 class LocallyLinearRelabelingStrategy: public RelabelingStrategy {
 public:
-    LocallyLinearRelabelingStrategy(const Data *data);
-    
-    // not 10000% sure about what I'm doing in this header file -- check carefully
-    
     LocallyLinearRelabelingStrategy(double lambda, const Data *data);
     
     std::unordered_map<size_t, double> relabel_outcomes(const Observations& observations,
@@ -42,6 +38,7 @@ public:
     
 private:
     double lambda;
+    const Data *data;
 };
 
 
