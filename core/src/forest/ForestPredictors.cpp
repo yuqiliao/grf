@@ -38,8 +38,10 @@ ForestPredictor ForestPredictors::regression_predictor(uint num_threads) {
   return ForestPredictor(num_threads, 1, prediction_strategy);
 }
 
-ForestPredictor ForestPredictors::locally_linear_predictor(uint num_threads, double lambda, const Data *data) {
-  std::shared_ptr<PredictionStrategy> prediction_strategy(new LocallyLinearPredictionStrategy(data));
+ForestPredictor ForestPredictors::locally_linear_predictor(uint num_threads,
+                                                           double lambda,
+                                                           const Data *data) {
+  std::shared_ptr<PredictionStrategy> prediction_strategy(new LocallyLinearPredictionStrategy(lambda, data));
   return ForestPredictor(num_threads, 1, prediction_strategy);
 }
 

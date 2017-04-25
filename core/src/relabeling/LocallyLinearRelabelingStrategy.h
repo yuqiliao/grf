@@ -23,14 +23,17 @@
 #include <unordered_map>
 #include <vector>
 #include "commons/Observations.h"
+#include "commons/Data.h"
 #include "tree/Tree.h"
 #include "relabeling/RelabelingStrategy.h"
 
 class LocallyLinearRelabelingStrategy: public RelabelingStrategy {
 public:
-    LocallyLinearRelabelingStrategy();
+    LocallyLinearRelabelingStrategy(const Data *data);
     
-    LocallyLinearRelabelingStrategy(double lambda);
+    // not 10000% sure about what I'm doing in this header file -- check carefully
+    
+    LocallyLinearRelabelingStrategy(double lambda, const Data *data);
     
     std::unordered_map<size_t, double> relabel_outcomes(const Observations& observations,
                                                         const std::vector<size_t>& node_sampleIDs);

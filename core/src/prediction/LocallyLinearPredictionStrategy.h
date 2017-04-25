@@ -25,7 +25,10 @@
 #include "prediction/PredictionValues.h"
 
 class LocallyLinearPredictionStrategy: public PredictionStrategy {
+
 public:
+    LocallyLinearPredictionStrategy(double lambda, const Data *data);
+    
     static const std::size_t OUTCOME;
 
     size_t prediction_length();
@@ -47,7 +50,7 @@ public:
     
 private:
     double lambda;
-    Data *data;
+    const Data *data;
 };
 
 #endif //GRADIENTFOREST_LOCALLYLINEARPREDICTIONSTRATEGY_H

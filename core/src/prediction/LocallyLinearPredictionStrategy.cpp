@@ -24,26 +24,38 @@
 #include "commons/Observations.h"
 #include "prediction/LocallyLinearPredictionStrategy.h"
 
+
+LocallyLinearPredictionStrategy::LocallyLinearPredictionStrategy(double lambda, const Data *data):
+    lambda(lambda),
+    data(data){
+};
+
+/*
+ // would be nice to have optional lambda but can force all this in R so not necessary right now 
+ LocallyLinearPredictionStrategy::LocallyLinearPredictionStrategy(const Data *data):
+    lambda(0.1),
+    Data(data){
+};
+ */
+
 const size_t LocallyLinearPredictionStrategy::OUTCOME = 0;
 
 size_t LocallyLinearPredictionStrategy::prediction_length() {
     return 1;
 }
 
-// currently just assuming lambda = 0.01. THIS OBVIOUSLY NEEDS TO BE CHANGED. But the goal is to see if the method works.
-
 Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
                                                     const std::vector<double>& average_prediction_values,
                                                     const std::unordered_map<size_t, double>& weights_by_sampleID,
                                                     const Observations& observations) {
     
-    Data input_data;
-    input_data = *data;
+    //Data input_data;
+    //input_data = *data;
     
     size_t n;
     size_t p;
     n = observations.get_num_samples(); // usage correct?
-    p = input_data->get_num_cols(); // use correct?
+    p = data->get_num_cols(); // use correct?
     
     // initialize weight matrix
     Eigen::MatrixXf weights(n,n);
@@ -66,7 +78,7 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
         for(size_t j=0; j<p; ++j){
             //X.block<1,1>(i,j) << data->get(i,j);
             //X.block<1,1>(i,j) = input_data.get(i,j);
-            X(i,j) = input_data.get(i,j);
+            X(i,j) = data->get(i,j);
             if(i != j){
                 weights(i,j) = 0;
             }
@@ -75,7 +87,7 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
     }
     
     // Pre-compute M = X^T X + lambda J
-    float lambda = 0.01;
+    //float lambda = 0.01;
     Eigen::MatrixXf J(p,p);
     Eigen::MatrixXf Id(p,p);
     J = Eigen::MatrixXf::Identity(p,p);
@@ -102,7 +114,6 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
 
 Prediction LocallyLinearPredictionStrategy::predict_with_variance(size_t sampleID,
                                                                   const std::vector<std::vector<size_t>>& leaf_sampleIDs,
-                                                                  const std::unordered_map<size_t, double>& weights_by_sampleID,
                                                                   const Observations& observations) {
     throw std::runtime_error("Variance estimates are not yet implemented.");
 }
