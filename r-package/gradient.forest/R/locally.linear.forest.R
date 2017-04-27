@@ -48,7 +48,7 @@ locally.linear.forest <- function(X,Y,sample.fraction = 0.5, mtry = ceiling(ncol
                              keep.inbag, sample.fraction, no.split.variables, seed, honesty, ci.group.size, lambda)
   
   forest[["original.data"]] <- input.data
-  class(forest) <- "regression.forest"
+  class(forest) <- "locally.linear.forest"
   forest
 }
 
