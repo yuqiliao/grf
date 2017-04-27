@@ -2,7 +2,7 @@
  This file is part of gradient-forest...
  #-------------------------------------------------------------------------------*/
 
-#include "utility.h"
+#include "commons/utility.h"
 #include "eigen3/Eigen/Dense"
 #include "LocallyLinearRelabelingStrategy.h"
 
