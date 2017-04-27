@@ -123,7 +123,8 @@ bool LocallyLinearPredictionStrategy::requires_leaf_sampleIDs(){
     return false;
 }
 
-PredictionValues LocallyLinearPredictionStrategy::precompute_prediction_values(const std::vector<std::vector<size_t>> leaf_sampleIDs,
-                                              const Observations& observations){
+PredictionValues LocallyLinearPredictionStrategy::precompute_prediction_values(
+    const std::vector<std::vector<size_t>>& leaf_sampleIDs,
+    const Observations& observations){
     throw std::runtime_error("Not implemented yet.");
 }

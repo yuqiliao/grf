@@ -43,9 +43,9 @@ public:
                                      uint ci_group_size);
     
     bool requires_leaf_sampleIDs();
-    
-    PredictionValues precompute_prediction_values(const std::vector<std::vector<size_t>>& leaf_sampleIDs,
-                                                  const Observations& observations);
+    PredictionValues precompute_prediction_values(
+        const std::vector<std::vector<size_t>>& leaf_sampleIDs,
+        const Observations& observations);
     
     
 private:
