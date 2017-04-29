@@ -31,8 +31,8 @@ public:
   static ForestPredictor regression_predictor(uint num_threads);
     
   static ForestPredictor locally_linear_predictor(uint num_threads,
-                                                  double lambda,
-                                                  const Data *data);
+                                                  const Data *data,
+                                                  double lambda);
 };
 
 

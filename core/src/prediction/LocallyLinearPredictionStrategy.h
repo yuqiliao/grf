@@ -27,7 +27,7 @@
 class LocallyLinearPredictionStrategy: public PredictionStrategy {
 
 public:
-    LocallyLinearPredictionStrategy(double lambda, const Data *data);
+    LocallyLinearPredictionStrategy(const Data *data, double lambda);
     
     static const std::size_t OUTCOME;
 

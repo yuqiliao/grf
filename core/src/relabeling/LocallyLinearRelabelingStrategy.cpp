@@ -43,7 +43,6 @@ std::unordered_map<size_t, double> LocallyLinearRelabelingStrategy::relabel_outc
     J = Eigen::MatrixXf::Identity(p,p);
     J(0,0) = 0;
     
-    
     Eigen::MatrixXf theta(p,1);
     
     // Pre-compute ridged variance estimate and its inverse
@@ -55,21 +54,21 @@ std::unordered_map<size_t, double> LocallyLinearRelabelingStrategy::relabel_outc
     theta = M_inverse*X.transpose()*Y;
     
     std::unordered_map<size_t, double> relabeled_observations;
+    
     for (size_t sampleID : node_sampleIDs) {
         double response = observations.get(Observations::OUTCOME, sampleID);
         Eigen::MatrixXf xi(1,p);
-        xi = X.block(1,p,sampleID,0);
+        xi = X.block(sampleID,0,1,p);
     
-        Eigen::MatrixXf temp(1,1);
+        Eigen::MatrixXf temp(1,p);
         temp = xi*theta;
-        
-        double difference;
-        difference = response-temp(1);
+        double difference = response-temp(1);
         
         Eigen::MatrixXf rho(p,1);
         rho = M_inverse*xi.transpose()*difference;
         relabeled_observations[sampleID] = rho(1);
     }
+    
     return relabeled_observations;
 }
 

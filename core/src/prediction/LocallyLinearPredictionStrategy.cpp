@@ -25,18 +25,10 @@
 #include "prediction/LocallyLinearPredictionStrategy.h"
 
 
-LocallyLinearPredictionStrategy::LocallyLinearPredictionStrategy(double lambda, const Data *data):
+LocallyLinearPredictionStrategy::LocallyLinearPredictionStrategy(const Data *data, double lambda):
     lambda(lambda),
     data(data){
 };
-
-/*
- // would be nice to have optional lambda but can force all this in R so not necessary right now 
- LocallyLinearPredictionStrategy::LocallyLinearPredictionStrategy(const Data *data):
-    lambda(0.1),
-    Data(data){
-};
- */
 
 const size_t LocallyLinearPredictionStrategy::OUTCOME = 0;
 
@@ -48,9 +40,7 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
                                                     const std::vector<double>& average_prediction_values,
                                                     const std::unordered_map<size_t, double>& weights_by_sampleID,
                                                     const Observations& observations) {
-    
-    //Data input_data;
-    //input_data = *data;
+    std::cout << "have I entered the file?";
     
     size_t n;
     size_t p;
@@ -59,6 +49,8 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
     
     // initialize weight matrix
     Eigen::MatrixXf weights(n,n);
+    
+    std::cout << "marker 1";
     
     // loop through all leaves and update weight matrix
     for (auto it = weights_by_sampleID.begin(); it != weights_by_sampleID.end(); ++it){
@@ -83,7 +75,7 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
                 weights(i,j) = 0;
             }
         }
-        Y.block<1,1>(i,0) << observations.get(Observations::OUTCOME, i);
+        Y.block(i,0,1,1) << observations.get(Observations::OUTCOME, i);
     }
     
     // Pre-compute M = X^T X + lambda J
@@ -94,6 +86,8 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
     Id = Eigen::MatrixXf::Identity(p,p);
     J(0,0) = 0;
     
+    std::cout << "marker 2";
+    
     Eigen::MatrixXf M(p,p);
     M = X.transpose()*weights*X + J*lambda;
     Eigen::MatrixXf M_inverse(p,p);
@@ -101,6 +95,8 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
     
     Eigen::MatrixXf theta(p,1); // dimensions ok??
     theta = M_inverse*X.transpose()*weights*Y;
+    
+    std::cout << "marker 3";
     
     std::vector<double> theta_vector;
     for(size_t i=1; i<p; ++i){
@@ -120,11 +116,43 @@ Prediction LocallyLinearPredictionStrategy::predict_with_variance(size_t sampleI
 }
 
 bool LocallyLinearPredictionStrategy::requires_leaf_sampleIDs(){
-    return false;
+    return true;
 }
 
 PredictionValues LocallyLinearPredictionStrategy::precompute_prediction_values(
-    const std::vector<std::vector<size_t>>& leaf_sampleIDs,
-    const Observations& observations){
-    throw std::runtime_error("Not implemented yet.");
+                                                                            const std::vector<std::vector<size_t>>& leaf_sampleIDs,
+                                                                            const Observations& observations) {
+    /*
+    size_t num_leaves = leaf_sampleIDs.size();
+    std::vector<std::vector<double>> values(num_leaves);
+    
+    //std::cout << "number of leaves";
+    //std::cout << num_leaves;
+    
+    for (size_t i = 0; i < num_leaves; i++) {
+        std::cout << i;
+        
+        const std::vector<size_t>& leaf_node = leaf_sampleIDs.at(i);
+        if (leaf_node.empty()) {
+            continue;
+        }
+        
+        std::vector<double>& averages = values[i];
+        averages.resize(1);
+        
+        double average = 0.0;
+        for (auto& sampleID : leaf_node) {
+            average += observations.get(Observations::OUTCOME, sampleID);
+        }
+        averages[OUTCOME] = average / leaf_node.size();
+    }
+    
+    std::cout << "returning from precompute doing okay";
+    
+    return PredictionValues(values, num_leaves, 1);
+     */
+    
+    std::cout << "did I get here??? this is precompute predition values btw.      ";
+    
+    return PredictionValues();
 }

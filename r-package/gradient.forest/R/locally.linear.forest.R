@@ -52,7 +52,7 @@ locally.linear.forest <- function(X,Y,sample.fraction = 0.5, mtry = ceiling(ncol
   forest
 }
 
-predict.locally.linear.forest <- function(forest, newdata = NULL, num.threads = NULL) {
+predict.locally.linear.forest <- function(forest, newdata = NULL, lambda=0.01, num.threads = NULL) {
   
   if (is.null(num.threads)) {
     num.threads <- 0
@@ -79,6 +79,8 @@ predict.locally.linear.forest <- function(forest, newdata = NULL, num.threads = 
     input.data <- forest[["original.data"]]
     theta <- locally_linear_predict_oob(forest.short, input.data, sparse.data, variable.names,
                            num.threads, lambda)
+                           
+    print("Note: returning theta")
     theta
     # do things with theta
     # NOT YET IMPLEMENTED 

@@ -75,7 +75,7 @@ ForestTrainer ForestTrainers::locally_linear_trainer(Data* data,
     
     std::shared_ptr<RelabelingStrategy> relabeling_strategy(new LocallyLinearRelabelingStrategy(lambda, data));
     std::shared_ptr<SplittingRuleFactory> splitting_rule_factory(new RegressionSplittingRuleFactory(data));
-    std::shared_ptr<PredictionStrategy> prediction_strategy(new LocallyLinearPredictionStrategy(lambda, data)); // should need lambda?? hmmmmm
+    std::shared_ptr<PredictionStrategy> prediction_strategy(new LocallyLinearPredictionStrategy(data, lambda));
     
     return ForestTrainer(observables, relabeling_strategy, splitting_rule_factory, prediction_strategy);
 }

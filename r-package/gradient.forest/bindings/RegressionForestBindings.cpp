@@ -28,12 +28,13 @@ Rcpp::List locally_linear_train(Rcpp::NumericMatrix input_data,
                             bool honesty,
                             unsigned int ci_group_size,
                             double lambda) {
+ 
   Data* data = RcppUtilities::convert_data(input_data, sparse_data, variable_names);
-
+    
   ForestTrainer trainer = ForestTrainers::locally_linear_trainer(data, outcome_index, lambda);
   RcppUtilities::initialize_trainer(trainer, mtry, num_trees, num_threads, min_node_size,
       sample_with_replacement, sample_fraction, no_split_variables, seed, honesty, ci_group_size);
-  
+    
   Forest forest = trainer.train(data);
 
   Rcpp::List result;
@@ -53,13 +54,24 @@ Rcpp::NumericMatrix locally_linear_predict(Rcpp::List forest,
                                        std::vector<std::string> variable_names,
                                        unsigned int num_threads,
                                        double lambda) {
+    
+  std::cout << "inside bindings. beginning predict.   ";
   Data *data = RcppUtilities::convert_data(input_data, sparse_data, variable_names);
+    
   Forest deserialized_forest = RcppUtilities::deserialize_forest(
       forest[RcppUtilities::SERIALIZED_FOREST_KEY]);
 
-  ForestPredictor predictor = ForestPredictors::locally_linear_predictor(num_threads, lambda, data);
-  std::vector<Prediction> predictions = predictor.predict(deserialized_forest, data);
+  ForestPredictor predictor = ForestPredictors::locally_linear_predictor(num_threads, data, lambda);
+    
+  std::cout << "bindings marker 1.   ";
+    
+  std::vector<Prediction> predictions = predictor.predict(deserialized_forest, data); //***
+
+  std::cout << "bindings marker 2.   ";
+    
   Rcpp::NumericMatrix result = RcppUtilities::create_prediction_matrix(predictions);
+    
+  std::cout << "bindings marker 3.   ";
 
   delete data;
   return result;
@@ -76,7 +88,7 @@ Rcpp::NumericMatrix locally_linear_predict_oob(Rcpp::List forest,
   Forest deserialized_forest = RcppUtilities::deserialize_forest(
       forest[RcppUtilities::SERIALIZED_FOREST_KEY]);
 
-  ForestPredictor predictor = ForestPredictors::locally_linear_predictor(num_threads, lambda, data);
+  ForestPredictor predictor = ForestPredictors::locally_linear_predictor(num_threads, data, lambda);
   std::vector<Prediction> predictions = predictor.predict_oob(deserialized_forest, data);
   Rcpp::NumericMatrix result = RcppUtilities::create_prediction_matrix(predictions);
 
