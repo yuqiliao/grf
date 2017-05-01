@@ -70,6 +70,8 @@ std::vector<Prediction> OptimizedPredictionCollector::collect_predictions(const 
                                                          forest.get_observations()));
     }
   }
+    std::cout << "I am inside the optimized prediction collector.    ";
+    
   return predictions;
 }
 

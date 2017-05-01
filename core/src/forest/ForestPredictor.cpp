@@ -26,7 +26,7 @@ ForestPredictor::ForestPredictor(uint num_threads,
   this->prediction_collector = prediction_strategy->requires_leaf_sampleIDs()
       ? std::shared_ptr<PredictionCollector>(new DefaultPredictionCollector(prediction_strategy, ci_group_size))
       : std::shared_ptr<PredictionCollector>(new OptimizedPredictionCollector(prediction_strategy));
-
+    
   this->num_threads = num_threads == DEFAULT_NUM_THREADS
       ? std::thread::hardware_concurrency()
       : num_threads;
@@ -70,7 +70,7 @@ std::vector<std::vector<size_t>> ForestPredictor::find_leaf_nodes(
                                  data,
                                  oob_prediction));
   }
-
+    
   for (auto& future : futures) {
     std::vector<std::vector<size_t>> leaf_nodes = future.get();
     leaf_nodes_by_tree.insert(leaf_nodes_by_tree.end(),

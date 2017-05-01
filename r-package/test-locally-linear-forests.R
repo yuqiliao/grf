@@ -19,25 +19,36 @@ linear_tail_2 <- function(x){
   }
 }
 
-n<- 300
+n <- 300
 x <- runif(n,-1,1)
 y <- sapply(x, function(x_i){linear_tail_2(x_i)}) + rnorm(n,0,0.05)
-#plt = plot(x,y)
 
+jpeg("rawplot.jpg")
+plt = plot(x,y)
+dev.off()
 
-#jpeg("myplot.jpg")
-#plt = plot(x,y)
-#dev.off()
+lambda = 0.01
 
-X <- cbind(rep(1,n),x,rnorm(n,0,1))
+X <- cbind(1,x,rnorm(n,0,0.5))
 
-quick_new_point <- c(1,0.4,-0.3)
+forest_one <- locally.linear.forest(X,y,sample.fraction = 0.5, mtry = 2,min.node.size = 10, ci.group.size = 1, lambda=lambda)
+weights <- predict(forest_one,newdata=data.frame(X)) # check if OOB prediction is working 
 
-forest_one <- locally.linear.forest(X,y,sample.fraction = 0.5, mtry = 2,num.trees = 2, num.threads = NULL, min.node.size = NULL, keep.inbag = FALSE, honesty = TRUE, ci.group.size = 2, seed = NULL, lambda=0.01)
+J <- diag(3)
+J[1,1] <- 0
 
-test_pred <- predict(forest_one, newdata=quick_new_point, lambda=0.01)
-#full_pred <- predict(forest_one,newdata=X,lambda=0.01)
+results <- sapply(1:n, function(i){
+  weight_matrix <- diag(weights[i,])
+  M_inverse <- solve( t(X) %*% weight_matrix %*% X + lambda*J)
+  second_term <- t(X) %*% weight_matrix
+  full_pred <- M_inverse %*% second_term %*% y
+  t(X[i,]) %*% full_pred
+})
 
-#jpeg("afterplot.jpg")
-#plt = plot(x,full_pred)
-#dev.off()
+df <- data.frame(cbind(x,results))
+newdf <- df[order(x),]
+
+jpeg("afterplot.jpg")
+plt = plot(x,y)
+points(newdf$x, newdf$results,col="red",'l',lwd=4)
+dev.off()

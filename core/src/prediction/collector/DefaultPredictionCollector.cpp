@@ -100,6 +100,7 @@ std::vector<Prediction> DefaultPredictionCollector::collect_predictions(
     }
     predictions.push_back(prediction);
   }
+    
   return predictions;
 }
 

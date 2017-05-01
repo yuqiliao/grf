@@ -25,88 +25,39 @@
 #include "prediction/LocallyLinearPredictionStrategy.h"
 
 
-LocallyLinearPredictionStrategy::LocallyLinearPredictionStrategy(const Data *data, double lambda):
-    lambda(lambda),
+LocallyLinearPredictionStrategy::LocallyLinearPredictionStrategy(const Data *data):
     data(data){
 };
 
 const size_t LocallyLinearPredictionStrategy::OUTCOME = 0;
 
 size_t LocallyLinearPredictionStrategy::prediction_length() {
-    return 1;
+    return data->get_num_rows();
 }
 
 Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
                                                     const std::vector<double>& average_prediction_values,
                                                     const std::unordered_map<size_t, double>& weights_by_sampleID,
                                                     const Observations& observations) {
-    std::cout << "have I entered the file?";
-    
     size_t n;
-    size_t p;
-    n = observations.get_num_samples(); // usage correct?
-    p = data->get_num_cols(); // use correct?
+    n = observations.get_num_samples();
+
+    Eigen::MatrixXf weights(n,1);
+    weights = Eigen::MatrixXf::Zero(n,1);
     
-    // initialize weight matrix
-    Eigen::MatrixXf weights(n,n);
-    
-    std::cout << "marker 1";
-    
-    // loop through all leaves and update weight matrix
     for (auto it = weights_by_sampleID.begin(); it != weights_by_sampleID.end(); ++it){
         size_t i = it->first;
-        float weight = it->second;
-        weights(i,i) = weight;
+        double weight = it->second;
+        weights(i) = weight;
     }
     
-    // we now move on to the local linear prediction assuming X has been formatted correctly
-    
-    //size_t p = Data::num_cols(data); // double check this method
-    Eigen::MatrixXf X(n,p);
-    Eigen::MatrixXf Y(n,1);
-    
-    // loop through observations to fill in X, Y, weights
+    std::vector<double> weights_vector;
     for(size_t i=0; i<n; ++i){
-        for(size_t j=0; j<p; ++j){
-            //X.block<1,1>(i,j) << data->get(i,j);
-            //X.block<1,1>(i,j) = input_data.get(i,j);
-            X(i,j) = data->get(i,j);
-            if(i != j){
-                weights(i,j) = 0;
-            }
-        }
-        Y.block(i,0,1,1) << observations.get(Observations::OUTCOME, i);
+        weights_vector.push_back(weights(i));
     }
     
-    // Pre-compute M = X^T X + lambda J
-    //float lambda = 0.01;
-    Eigen::MatrixXf J(p,p);
-    Eigen::MatrixXf Id(p,p);
-    J = Eigen::MatrixXf::Identity(p,p);
-    Id = Eigen::MatrixXf::Identity(p,p);
-    J(0,0) = 0;
-    
-    std::cout << "marker 2";
-    
-    Eigen::MatrixXf M(p,p);
-    M = X.transpose()*weights*X + J*lambda;
-    Eigen::MatrixXf M_inverse(p,p);
-    M_inverse = M.colPivHouseholderQr().solve(Id);
-    
-    Eigen::MatrixXf theta(p,1); // dimensions ok??
-    theta = M_inverse*X.transpose()*weights*Y;
-    
-    std::cout << "marker 3";
-    
-    std::vector<double> theta_vector;
-    for(size_t i=1; i<p; ++i){
-        theta_vector[i] = theta(i);
-    }
-    
-    return Prediction(theta_vector); // do not have test point yet; returning theta for now instead
+    return Prediction(weights_vector);
 }
-
-// now defining dummy methods to see if the compiler stops complaining to me about pure virtual methods
 
 Prediction LocallyLinearPredictionStrategy::predict_with_variance(size_t sampleID,
                                                                   const std::vector<std::vector<size_t>>& leaf_sampleIDs,
@@ -120,39 +71,7 @@ bool LocallyLinearPredictionStrategy::requires_leaf_sampleIDs(){
 }
 
 PredictionValues LocallyLinearPredictionStrategy::precompute_prediction_values(
-                                                                            const std::vector<std::vector<size_t>>& leaf_sampleIDs,
-                                                                            const Observations& observations) {
-    /*
-    size_t num_leaves = leaf_sampleIDs.size();
-    std::vector<std::vector<double>> values(num_leaves);
-    
-    //std::cout << "number of leaves";
-    //std::cout << num_leaves;
-    
-    for (size_t i = 0; i < num_leaves; i++) {
-        std::cout << i;
-        
-        const std::vector<size_t>& leaf_node = leaf_sampleIDs.at(i);
-        if (leaf_node.empty()) {
-            continue;
-        }
-        
-        std::vector<double>& averages = values[i];
-        averages.resize(1);
-        
-        double average = 0.0;
-        for (auto& sampleID : leaf_node) {
-            average += observations.get(Observations::OUTCOME, sampleID);
-        }
-        averages[OUTCOME] = average / leaf_node.size();
-    }
-    
-    std::cout << "returning from precompute doing okay";
-    
-    return PredictionValues(values, num_leaves, 1);
-     */
-    
-    std::cout << "did I get here??? this is precompute predition values btw.      ";
-    
+                                                                const std::vector<std::vector<size_t>>& leaf_sampleIDs,
+                                                                const Observations& observations){
     return PredictionValues();
 }
