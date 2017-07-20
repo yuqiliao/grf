@@ -69,12 +69,15 @@ ForestTrainer ForestTrainers::regression_trainer(Data* data,
 }
 
 ForestTrainer ForestTrainers::locally_linear_trainer(Data* data,
-                                                   size_t outcome_index) {
+                                                     Data* test_data,
+                                                     double lambda,
+                                                     size_t outcome_index) {
     std::unordered_map<size_t, size_t> observables = {{Observations::OUTCOME, outcome_index}};
     
     std::shared_ptr<RelabelingStrategy> relabeling_strategy(new NoopRelabelingStrategy());
     std::shared_ptr<SplittingRuleFactory> splitting_rule_factory(new RegressionSplittingRuleFactory(data));
-    std::shared_ptr<PredictionStrategy> prediction_strategy(new LocallyLinearPredictionStrategy(data));
+    std::shared_ptr<PredictionStrategy> prediction_strategy(new LocallyLinearPredictionStrategy(data, test_data, lambda));
+    //std::shared_ptr<PredictionStrategy> prediction_strategy(new LocallyLinearPredictionStrategy(data));
     
     return ForestTrainer(observables, relabeling_strategy, splitting_rule_factory, prediction_strategy);
 }
