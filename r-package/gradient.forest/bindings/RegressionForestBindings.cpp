@@ -45,6 +45,7 @@ Rcpp::List locally_linear_train(Rcpp::NumericMatrix input_data,
   result.push_back(forest.get_trees().size(), "num.trees");
 
   delete data;
+  delete test_data;
 
   return result;
 }

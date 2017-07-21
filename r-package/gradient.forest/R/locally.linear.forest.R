@@ -1,6 +1,6 @@
-locally.linear.forest <- function(X,Y,sample.fraction = 0.5, mtry = ceiling(ncol(X)/3), 
+locally.linear.forest <- function(X,Y,sample.fraction = 0.5, mtry = ceiling(ncol(X)/3), variable_names = NULL, lambda = 1,
                                   num.trees = 500, num.threads = NULL, min.node.size = NULL, keep.inbag = FALSE, 
-                                  honesty = TRUE, ci.group.size = 2, seed = NULL) {
+                                  honesty = TRUE, ci_group_size = 1, seed = NULL) {
   sparse.data <- as.matrix(0)
   
   if (is.null(mtry)) {
@@ -38,21 +38,22 @@ locally.linear.forest <- function(X,Y,sample.fraction = 0.5, mtry = ceiling(ncol
   }
   
   input.data <- as.matrix(cbind(X, Y))
-  variable.names <- c(colnames(X), "outcome")
+  #variable.names <- c(colnames(X), "outcome")
+  variable_names <- c(variable_names, "outcome")
   outcome.index <- ncol(input.data)
   outcome.index.zeroindexed <- outcome.index - 1
   no.split.variables <- numeric(0)
   
-  forest <- locally_linear_train(input.data, outcome.index.zeroindexed, sparse.data,
-                             variable.names, mtry, num.trees, verbose, num.threads, min.node.size, sample.with.replacement, 
-                             keep.inbag, sample.fraction, no.split.variables, seed, honesty, ci.group.size)
+  forest <- locally_linear_train(input.data, outcome.index.zeroindexed, sparse.data, variable_names,
+                                 lambda, mtry, num.trees, verbose, num.threads, min.node.size, sample.with.replacement, 
+                                 keep.inbag, sample.fraction, no.split.variables, seed, honesty, ci_group_size)
   
   forest[["original.data"]] <- input.data
   class(forest) <- "locally.linear.forest"
   forest
 }
 
-predict.locally.linear.forest <- function(forest, lambda=0, training.data, newdata = NULL, num.threads = NULL) {
+predict.locally.linear.forest <- function(forest, lambda=1, training.data, newdata = NULL, num.threads = NULL) {
   
   if (is.null(num.threads)) {
     num.threads <- 0
