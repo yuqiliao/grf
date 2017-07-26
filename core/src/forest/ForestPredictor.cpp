@@ -33,11 +33,13 @@ ForestPredictor::ForestPredictor(uint num_threads,
 }
 
 std::vector<Prediction> ForestPredictor::predict(const Forest& forest, Data* data) {
+    
   std::vector<std::vector<size_t>> leaf_nodes_by_tree = find_leaf_nodes(forest, data, false);
   return prediction_collector->collect_predictions(forest, data, leaf_nodes_by_tree, false);
 }
 
 std::vector<Prediction> ForestPredictor::predict_oob(const Forest& forest, Data* data) {
+  
   std::vector<std::vector<size_t>> leaf_nodes_by_tree = find_leaf_nodes(forest, data, true);
   return prediction_collector->collect_predictions(forest, data, leaf_nodes_by_tree, true);
 }
@@ -46,11 +48,12 @@ std::vector<std::vector<size_t>> ForestPredictor::find_leaf_nodes(
     const Forest& forest,
     Data* data,
     bool oob_prediction) {
+    
   size_t num_trees = forest.get_trees().size();
 
   std::vector<std::vector<size_t>> leaf_nodes_by_tree;
   leaf_nodes_by_tree.reserve(num_trees);
-
+    
   std::vector<uint> thread_ranges;
   split_sequence(thread_ranges, 0, num_trees - 1, num_threads);
 
@@ -87,6 +90,7 @@ std::vector<std::vector<size_t>> ForestPredictor::find_batch(
     const Forest &forest,
     Data *prediction_data,
     bool oob_prediction) {
+    
   std::vector<std::vector<size_t>> all_leaf_node_IDs(num_trees);
   for (size_t i = 0; i < num_trees; ++i) {
     std::shared_ptr<Tree> tree = forest.get_trees()[start + i];

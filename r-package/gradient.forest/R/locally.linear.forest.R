@@ -53,7 +53,7 @@ locally.linear.forest <- function(X,Y,sample.fraction = 0.5, mtry = ceiling(ncol
   forest
 }
 
-predict.locally.linear.forest <- function(forest, lambda=1, training.data, newdata = NULL, num.threads = NULL) {
+predict.locally.linear.forest <- function(forest, lambda=1, newdata = NULL, num.threads = NULL) {
   
   if (is.null(num.threads)) {
     num.threads <- 0
@@ -61,31 +61,38 @@ predict.locally.linear.forest <- function(forest, lambda=1, training.data, newda
     stop("Error: Invalid value for num.threads")
   }
   
-  if(is.null(training.data)){
-    stop("Error: prediction method requires non-null training.data")
-  }
-  
-  #require(glmnet)
-  
   sparse.data <- as.matrix(0)
-  sparse.training <- as.matrix(0)
   variable.names <- character(0)
-  
   forest.short <- forest[-which(names(forest) == "original.data")]
   
   if (!is.null(newdata)) {
+    training.data <- forest[["original.data"]]
+    p <- ncol(training.data) - 1
+    training.data <- training.data[,1:p] # remove responses, since they are already stored
+    
+    sparse.training <- as.matrix(0)
     input.data <- as.matrix(cbind(newdata, NA))
+    
+    #print("Cpp yhat")
     yhat <- locally_linear_predict(forest.short, input.data, sparse.data, training.data, sparse.training, lambda, variable.names, num.threads)
     #yhat <- sapply(1:n, function(i){
     #w = weights[i,]
     #fit = glmnet(X,Y,weights=w,alpha=0,lambda=lambda)
     #predict(fit, newdata)[i]
     #})
+    #print("printing R yhat")
+    #print(yhat)
     return(yhat)
     
   } else {
+    print("oob prediction")
+    
     input.data <- forest[["original.data"]]
-    yhat <- locally_linear_predict(forest.short, input.data, sparse.data, training.data, sparse.training, lambda, variable.names, num.threads)
+    
+    print("found input data, calling cpp predict_oob now")
+    
+    print("cpp yhat")
+    yhat <- locally_linear_predict_oob(forest.short, input.data, sparse.data, lambda, variable.names, num.threads)
     #weights <- locally_linear_predict_oob(forest.short, input.data, sparse.data, variable.names,num.threads)
     #yhat <- 0
     #print("not yet implemented")
@@ -95,6 +102,8 @@ predict.locally.linear.forest <- function(forest, lambda=1, training.data, newda
     #  fit = glmnet(X,Y,weights=w,alpha=0,lambda=lambda)
     #  predict(fit)[i]
     #})
+    print("printing R yhat")
+    print(yhat)
     return(yhat)               
   }
 }

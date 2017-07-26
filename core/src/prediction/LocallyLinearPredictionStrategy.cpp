@@ -43,8 +43,9 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
                                                     const std::vector<double>& average_prediction_values,
                                                     const std::unordered_map<size_t, double>& weights_by_sampleID,
                                                     const Observations& observations) {
+    
     size_t n;
-    n = observations.get_num_samples(); // observations == ys
+    n = observations.get_num_samples();
     
     Eigen::MatrixXf weights(n,1);
     weights = Eigen::MatrixXf::Zero(n,1);
@@ -55,20 +56,15 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
         weights(i) = weight;
     }
     
-    /*
-    std::vector<double> weights_vector;
-    for(size_t i=0; i<n; ++i){
-        weights_vector.push_back(weights(i));
-    }
-     this may not be necessary, I might want it as an Eigen object actually.
-     */
-    
     size_t p = data->get_num_cols();
     
     // generate training data as Eigen objects
     
     Eigen::MatrixXf X(n, p);
     Eigen::MatrixXf Y(n, 1);
+    
+    //std::cout << "initialized training X and Y";
+    //std::cout << "checking that X and Y are actually full";
     
     for (size_t i=0; i<n; ++i) {
         for(size_t j=0; j<p; ++j){
@@ -78,13 +74,18 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
         ++i;
     }
     
+    /*std::cout << "training data filled in";
+    for (size_t i = 0; i < n; ++i){
+        std::cout << X(i,0) << ' ';
+    }
+     */
+    
     Eigen::MatrixXf Id(p,p);
     Eigen::MatrixXf J(p,p);
     
     Id = Eigen::MatrixXf::Identity(p,p);
     J = Eigen::MatrixXf::Identity(p,p);
     J(0,0) = 0;
-    
     
     // Pre-compute ridged variance estimate and its inverse
     Eigen::MatrixXf M(p,p);
@@ -104,10 +105,22 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
     Eigen::MatrixXf yhat;
     yhat = test_point.transpose()*theta;
     
+    //std::cout << "found yhat, converting back to std vector";
+    
     std::vector<double> yhat_vector;
+    yhat_vector.push_back(yhat(0));
+    
+    //std::cout << yhat_vector[0];
+    // DOUBLE CHECK ME
+    /*std::vector<double> yhat_vector;
     for(size_t i=0; i<p; ++i){
-        yhat_vector[i] = yhat(i);
+        yhat_vector.push_back(yhat(i));
     }
+    
+    std::cout << "returning:";
+    for (auto i = yhat_vector.begin(); i != yhat_vector.end(); ++i)
+        std::cout << *i << ' ';
+    */
     
     return Prediction(yhat_vector);
 }

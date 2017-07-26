@@ -15,14 +15,14 @@
  along with gradient-forest. If not, see <http://www.gnu.org/licenses/>.
  #-------------------------------------------------------------------------------*/
 
-// #include "prediction/PredictionStrategy.h"
-// #include "commons/utility.h"
-#include "src/forest/ForestPredictor.h"
-#include "src/forest/ForestTrainer.h"
-#include "src/utilities/ForestTestUtilities.h"
+#include "prediction/PredictionStrategy.h"
+#include "commons/utility.h"
+#include "forest/ForestPredictor.h"
+#include "forest/ForestTrainer.h"
+#include "utilities/ForestTestUtilities.h"
 
-#include "src/forest/ForestTrainers.h"
-#include "src/forest/ForestPredictors.h"
+#include "forest/ForestTrainers.h"
+#include "forest/ForestPredictors.h"
 
 #include "catch.hpp"
 
@@ -32,13 +32,12 @@ TEST_CASE("honest locally linear forests are shift invariant", "[locally linear,
     Data* data = load_data("test/forest/resources/gaussian_data.csv");
     uint outcome_index = 10;
     
-    ForestTrainer trainer = ForestTrainers::locally_linear_trainer(data, outcome_index, 0.01);
+    ForestTrainer trainer = ForestTrainers::locally_linear_trainer(data, data, outcome_index, 0.01);
     ForestTestUtilities::init_honest_trainer(trainer);
     
     Forest forest = trainer.train(data);
     
-    /*
-    ForestPredictor predictor = ForestPredictors::locally_linear_predictor(4,0.01,data);
+    ForestPredictor predictor = ForestPredictors::locally_linear_predictor(4,0.01,data,data);
     std::vector<Prediction> predictions = predictor.predict_oob(forest, data);
     
     // Shift each outcome by 1, and re-run the forest.
@@ -48,11 +47,11 @@ TEST_CASE("honest locally linear forests are shift invariant", "[locally linear,
         data->set(outcome_index, r, outcome + 1, error);
     }
     
-    ForestTrainer shifted_trainer = ForestTrainers::locally_lienear_trainer(data, outcome_index, 0.01);
+    ForestTrainer shifted_trainer = ForestTrainers::locally_lienear_trainer(data, data, outcome_index, 0.01);
     ForestTestUtilities::init_trainer(shifted_trainer);
     
     Forest shifted_forest = trainer.train(data);
-    ForestPredictor shifted_predictor = ForestPredictors::locally_linear_predictor(4,0.01,data);
+    ForestPredictor shifted_predictor = ForestPredictors::locally_linear_predictor(4,0.01,data,data);
     std::vector<Prediction> shifted_predictions = shifted_predictor.predict_oob(shifted_forest, data);
     
     REQUIRE(predictions.size() == shifted_predictions.size());
@@ -68,7 +67,6 @@ TEST_CASE("honest locally linear forests are shift invariant", "[locally linear,
     }
     
     REQUIRE(equal_doubles(delta / predictions.size(), 1, 1e-1));
-     */
     
     cout << "I ran the locally linear forest test"
     
