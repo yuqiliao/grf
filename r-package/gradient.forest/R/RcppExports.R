@@ -33,7 +33,7 @@ locally_linear_predict <- function(forest, input_data, sparse_data, train, spars
     .Call('gradient_forest_locally_linear_predict', PACKAGE = 'gradient.forest', forest, input_data, sparse_data, train, sparse_training_data, lambda, variable_names, num_threads)
 }
 
-locally_linear_predict_oob <- function(forest, input_data, sparse_data, lambda, variable_names, num_threads) {
-    .Call('gradient_forest_locally_linear_predict_oob', PACKAGE = 'gradient.forest', forest, input_data, sparse_data, lambda, variable_names, num_threads)
+locally_linear_predict_oob <- function(forest, input_data, sparse_data, train, sparse_training_data, lambda, variable_names, num_threads) {
+    .Call('gradient_forest_locally_linear_predict_oob', PACKAGE = 'gradient.forest', forest, input_data, sparse_data, train, sparse_training_data, lambda, variable_names, num_threads)
 }
 

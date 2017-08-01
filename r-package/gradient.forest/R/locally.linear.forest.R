@@ -38,7 +38,6 @@ locally.linear.forest <- function(X,Y,sample.fraction = 0.5, mtry = ceiling(ncol
   }
   
   input.data <- as.matrix(cbind(X, Y))
-  #variable.names <- c(colnames(X), "outcome")
   variable_names <- c(variable_names, "outcome")
   outcome.index <- ncol(input.data)
   outcome.index.zeroindexed <- outcome.index - 1
@@ -68,42 +67,22 @@ predict.locally.linear.forest <- function(forest, lambda=1, newdata = NULL, num.
   if (!is.null(newdata)) {
     training.data <- forest[["original.data"]]
     p <- ncol(training.data) - 1
-    training.data <- training.data[,1:p] # remove responses, since they are already stored
+    training.data <- training.data[,1:p] # remove responses (already stored)
     
     sparse.training <- as.matrix(0)
-    input.data <- as.matrix(cbind(newdata, NA))
+    input.data <- as.matrix(newdata)
     
-    #print("Cpp yhat")
     yhat <- locally_linear_predict(forest.short, input.data, sparse.data, training.data, sparse.training, lambda, variable.names, num.threads)
-    #yhat <- sapply(1:n, function(i){
-    #w = weights[i,]
-    #fit = glmnet(X,Y,weights=w,alpha=0,lambda=lambda)
-    #predict(fit, newdata)[i]
-    #})
-    #print("printing R yhat")
-    #print(yhat)
     return(yhat)
     
   } else {
-    print("oob prediction")
+    training.data <- forest[["original.data"]]
+    sparse.training <- as.matrix(0)
     
-    input.data <- forest[["original.data"]]
+    p <- ncol(training.data) - 1
+    input.data <- training.data[,1:p] # remove responses on input data
     
-    print("found input data, calling cpp predict_oob now")
-    
-    print("cpp yhat")
-    yhat <- locally_linear_predict_oob(forest.short, input.data, sparse.data, lambda, variable.names, num.threads)
-    #weights <- locally_linear_predict_oob(forest.short, input.data, sparse.data, variable.names,num.threads)
-    #yhat <- 0
-    #print("not yet implemented")
-    
-    #yhat <- sapply(1:n, function(i){
-    #  w = weights[i,]
-    #  fit = glmnet(X,Y,weights=w,alpha=0,lambda=lambda)
-    #  predict(fit)[i]
-    #})
-    print("printing R yhat")
-    print(yhat)
+    yhat <- locally_linear_predict_oob(forest.short, input.data, sparse.data, training.data, sparse.training, lambda, variable.names, num.threads)
     return(yhat)               
   }
 }

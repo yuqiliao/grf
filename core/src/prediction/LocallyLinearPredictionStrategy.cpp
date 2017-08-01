@@ -26,7 +26,6 @@
 
 
 LocallyLinearPredictionStrategy::LocallyLinearPredictionStrategy(const Data *data, const Data *test_data, double lambda):
-    //totally not sure that this is right
     data(data),
     test_data(test_data),
     lambda(lambda){
@@ -36,91 +35,66 @@ const size_t LocallyLinearPredictionStrategy::OUTCOME = 0;
 
 size_t LocallyLinearPredictionStrategy::prediction_length() {
     return 1;
-    //return data->get_num_rows(); // this should change. to 1? to test data something? check other methods.
 }
 
 Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
                                                     const std::vector<double>& average_prediction_values,
                                                     const std::unordered_map<size_t, double>& weights_by_sampleID,
                                                     const Observations& observations) {
-    
     size_t n;
-    n = observations.get_num_samples();
+    size_t p;
     
-    Eigen::MatrixXf weights(n,1);
-    weights = Eigen::MatrixXf::Zero(n,1);
+    n = observations.get_num_samples();
+    p = test_data->get_num_cols();
+    
+    Eigen::MatrixXf weights(n,n);
+    weights = Eigen::MatrixXf::Zero(n,n);
     
     for (auto it = weights_by_sampleID.begin(); it != weights_by_sampleID.end(); ++it){
         size_t i = it->first;
         double weight = it->second;
-        weights(i) = weight;
+        weights(i,i) = weight;
     }
     
-    size_t p = data->get_num_cols();
-    
-    // generate training data as Eigen objects
-    
-    Eigen::MatrixXf X(n, p);
-    Eigen::MatrixXf Y(n, 1);
-    
-    //std::cout << "initialized training X and Y";
-    //std::cout << "checking that X and Y are actually full";
-    
-    for (size_t i=0; i<n; ++i) {
-        for(size_t j=0; j<p; ++j){
-            X(i,j) = data->get(i,j);
-        }
-        Y(i) = observations.get(Observations::OUTCOME, sampleID);
-        ++i;
-    }
-    
-    /*std::cout << "training data filled in";
-    for (size_t i = 0; i < n; ++i){
-        std::cout << X(i,0) << ' ';
-    }
-     */
-    
-    Eigen::MatrixXf Id(p,p);
-    Eigen::MatrixXf J(p,p);
-    
-    Id = Eigen::MatrixXf::Identity(p,p);
-    J = Eigen::MatrixXf::Identity(p,p);
-    J(0,0) = 0;
-    
-    // Pre-compute ridged variance estimate and its inverse
-    Eigen::MatrixXf M(p,p);
-    Eigen::MatrixXf M_inverse(p,p);
-    M = X.transpose()*X + J*lambda;
-    M_inverse = M.colPivHouseholderQr().solve(Id);
-    
-    // create theta vector
-    Eigen::MatrixXf theta(p,1);
-    theta = M_inverse*X.transpose()*Y;
-    
-    //
+    // create test point vector
     Eigen::MatrixXf test_point(1, p);
     for(size_t j=0; j<p; ++j){
         test_point(j) = test_data->get(sampleID,j);
     }
-    Eigen::MatrixXf yhat;
-    yhat = test_point.transpose()*theta;
     
-    //std::cout << "found yhat, converting back to std vector";
+    // generate design matrix X and responses Y as Eigen objects
+    Eigen::MatrixXf X(n, p+1);
+    Eigen::MatrixXf Y(n, 1);
     
-    std::vector<double> yhat_vector;
-    yhat_vector.push_back(yhat(0));
-    
-    //std::cout << yhat_vector[0];
-    // DOUBLE CHECK ME
-    /*std::vector<double> yhat_vector;
-    for(size_t i=0; i<p; ++i){
-        yhat_vector.push_back(yhat(i));
+    for (size_t i=0; i<n; ++i) {
+        for(size_t j=0; j<p; ++j){
+            X(i,j+1) = test_point(j) - data->get(i,j);
+        }
+        Y(i) = observations.get(Observations::OUTCOME, i);
+        X(i, 0) = 1;
     }
     
-    std::cout << "returning:";
-    for (auto i = yhat_vector.begin(); i != yhat_vector.end(); ++i)
-        std::cout << *i << ' ';
-    */
+    Eigen::MatrixXf Id(p+1,p+1);
+    Eigen::MatrixXf J(p+1,p+1);
+    
+    Id = Eigen::MatrixXf::Identity(p+1,p+1);
+    J = Eigen::MatrixXf::Identity(p+1,p+1);
+    J(0,0) = 0;
+    J *= lambda;
+    
+    // Pre-compute ridged variance estimate and its inverse
+    Eigen::MatrixXf M(p+1,p+1);
+    Eigen::MatrixXf M_inverse(p+1,p+1);
+    //M = X.transpose()*weights*X + J*lambda;
+    M  = X.transpose()*weights*X + J;
+    M_inverse = M.colPivHouseholderQr().solve(Id);
+    
+    // create theta vector
+    Eigen::MatrixXf theta(p+1,1);
+    theta = M_inverse*X.transpose()*weights*Y;
+    
+    std::vector<double> yhat_vector;
+    yhat_vector.push_back(theta(0));
     
     return Prediction(yhat_vector);
 }

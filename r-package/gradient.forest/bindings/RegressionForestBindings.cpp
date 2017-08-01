@@ -77,11 +77,13 @@ Rcpp::NumericMatrix locally_linear_predict(Rcpp::List forest,
 Rcpp::NumericMatrix locally_linear_predict_oob(Rcpp::List forest,
                                            Rcpp::NumericMatrix input_data,
                                            Rcpp::RawMatrix sparse_data,
+                                           Rcpp::NumericMatrix train,
+                                           Rcpp::RawMatrix sparse_training_data,
                                            double lambda,
                                            std::vector<std::string> variable_names,
                                            unsigned int num_threads) {
-  Data *data = RcppUtilities::convert_data(input_data, sparse_data, variable_names);
-  Data *test_data = data;
+  Data *test_data = RcppUtilities::convert_data(input_data, sparse_data, variable_names);
+  Data *data = RcppUtilities::convert_data(train, sparse_training_data, variable_names);
     
   Forest deserialized_forest = RcppUtilities::deserialize_forest(
       forest[RcppUtilities::SERIALIZED_FOREST_KEY]);
@@ -92,5 +94,6 @@ Rcpp::NumericMatrix locally_linear_predict_oob(Rcpp::List forest,
 
 
   delete data;
+  delete test_data;
   return result;
 }
