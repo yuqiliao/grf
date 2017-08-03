@@ -29,7 +29,7 @@ class LocallyLinearPredictionStrategy: public PredictionStrategy {
 public:
     LocallyLinearPredictionStrategy(const Data *data,
                                     const Data *test_data,
-                                    double lambda);
+                                    std::vector<double> lambda);
     
     static const std::size_t OUTCOME;
 
@@ -53,7 +53,7 @@ public:
 private:
     const Data *data;
     const Data *test_data;
-    double lambda;
+    std::vector<double> lambda;
 };
 
 #endif //GRADIENTFOREST_LOCALLYLINEARPREDICTIONSTRATEGY_H

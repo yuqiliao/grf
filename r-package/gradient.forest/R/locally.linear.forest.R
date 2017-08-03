@@ -1,5 +1,5 @@
-locally.linear.forest <- function(X,Y,sample.fraction = 0.5, mtry = ceiling(ncol(X)/3), variable_names = NULL, lambda = 1,
-                                  num.trees = 500, num.threads = NULL, min.node.size = NULL, keep.inbag = FALSE, 
+locally.linear.forest <- function(X,Y,sample.fraction = 0.5, mtry = ceiling(ncol(X)/3), variable_names = NULL, lambda = NULL,
+                                  penalties = NULL, num.trees = 500, num.threads = NULL, min.node.size = NULL, keep.inbag = FALSE, 
                                   honesty = TRUE, ci_group_size = 1, seed = NULL) {
   sparse.data <- as.matrix(0)
   
@@ -37,6 +37,25 @@ locally.linear.forest <- function(X,Y,sample.fraction = 0.5, mtry = ceiling(ncol
     seed <- runif(1, 0, .Machine$integer.max)
   }
   
+  p <- ncol(X)
+  
+  if(is.null(penalties) & is.null(lambda)){
+    regularization <- rep(1, p)
+  }else if(is.null(lambda)){
+    if(length(penalties) == p){
+      regularization <- penalties 
+    }else{
+      stop("Error: Invalid length for penalties.")
+    }
+  }else if(is.null(penalties)){
+    if(length(lambda) != 1){
+      stop("Error: Invalid value for lamdba.")
+    }
+    regularization <- rep(lambda, p)
+  }else{
+    stop("Error: Invalid entries for regularization parameters. Use only lambda or penalties.")
+  }
+  
   input.data <- as.matrix(cbind(X, Y))
   variable_names <- c(variable_names, "outcome")
   outcome.index <- ncol(input.data)
@@ -44,15 +63,16 @@ locally.linear.forest <- function(X,Y,sample.fraction = 0.5, mtry = ceiling(ncol
   no.split.variables <- numeric(0)
   
   forest <- locally_linear_train(input.data, outcome.index.zeroindexed, sparse.data, variable_names,
-                                 lambda, mtry, num.trees, verbose, num.threads, min.node.size, sample.with.replacement, 
+                                 regularization, mtry, num.trees, verbose, num.threads, min.node.size, sample.with.replacement, 
                                  keep.inbag, sample.fraction, no.split.variables, seed, honesty, ci_group_size)
   
   forest[["original.data"]] <- input.data
+  forest[["regularization"]] <- regularization
   class(forest) <- "locally.linear.forest"
   forest
 }
 
-predict.locally.linear.forest <- function(forest, lambda=1, newdata = NULL, num.threads = NULL) {
+predict.locally.linear.forest <- function(forest, newdata = NULL, num.threads = NULL) {
   
   if (is.null(num.threads)) {
     num.threads <- 0
@@ -64,25 +84,24 @@ predict.locally.linear.forest <- function(forest, lambda=1, newdata = NULL, num.
   variable.names <- character(0)
   forest.short <- forest[-which(names(forest) == "original.data")]
   
+  regularization <- forest[["regularization"]]
+  
+  training.data <- forest[["original.data"]]
+  p <- ncol(training.data) - 1
+  training.data <- training.data[,1:p] 
+  
+  sparse.training <- as.matrix(0)
+  
   if (!is.null(newdata)) {
-    training.data <- forest[["original.data"]]
-    p <- ncol(training.data) - 1
-    training.data <- training.data[,1:p] # remove responses (already stored)
-    
-    sparse.training <- as.matrix(0)
     input.data <- as.matrix(newdata)
     
-    yhat <- locally_linear_predict(forest.short, input.data, sparse.data, training.data, sparse.training, lambda, variable.names, num.threads)
+    yhat <- locally_linear_predict(forest.short, input.data, sparse.data, training.data, sparse.training, regularization, variable.names, num.threads)
     return(yhat)
     
   } else {
-    training.data <- forest[["original.data"]]
-    sparse.training <- as.matrix(0)
+    input.data <- training.data
     
-    p <- ncol(training.data) - 1
-    input.data <- training.data[,1:p] # remove responses on input data
-    
-    yhat <- locally_linear_predict_oob(forest.short, input.data, sparse.data, training.data, sparse.training, lambda, variable.names, num.threads)
+    yhat <- locally_linear_predict_oob(forest.short, input.data, sparse.data, training.data, sparse.training, regularization, variable.names, num.threads)
     return(yhat)               
   }
 }

@@ -25,7 +25,7 @@
 #include "prediction/LocallyLinearPredictionStrategy.h"
 
 
-LocallyLinearPredictionStrategy::LocallyLinearPredictionStrategy(const Data *data, const Data *test_data, double lambda):
+LocallyLinearPredictionStrategy::LocallyLinearPredictionStrategy(const Data *data, const Data *test_data, std::vector<double> lambda):
     data(data),
     test_data(test_data),
     lambda(lambda){
@@ -80,12 +80,15 @@ Prediction LocallyLinearPredictionStrategy::predict(size_t sampleID,
     Id = Eigen::MatrixXf::Identity(p+1,p+1);
     J = Eigen::MatrixXf::Identity(p+1,p+1);
     J(0,0) = 0;
-    J *= lambda;
+    
+    // Insert ridge correction
+    for(size_t i = 1; i<p+1; ++i){
+        J(i,i) *= lambda[i-1];
+    }
     
     // Pre-compute ridged variance estimate and its inverse
     Eigen::MatrixXf M(p+1,p+1);
     Eigen::MatrixXf M_inverse(p+1,p+1);
-    //M = X.transpose()*weights*X + J*lambda;
     M  = X.transpose()*weights*X + J;
     M_inverse = M.colPivHouseholderQr().solve(Id);
     

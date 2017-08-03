@@ -34,7 +34,7 @@ public:
                                           size_t outcome_index);
   static ForestTrainer locally_linear_trainer(Data* data,
                                               Data* test_data,
-                                              double lambda,
+                                              std::vector<double> lambda,
                                               size_t outcome_index);
 };
 

@@ -1,13 +1,14 @@
 rm(list = ls())
 library(gradient.forest)
 
-p = 10
+p = 5
 n = 600
 frac = 0.70
-mtry = 4
+mtry = 2
 sigma = 0.1
-leaf.size = 2
-lambda = 2.5
+leaf.size = 1
+lambda = 1
+penalties = c(0.2,rep(2,4))
 
 mu = function(xx) log(1 + exp(6 * xx))
 X = matrix(runif(p*n, -1, 1), n, p)
@@ -15,7 +16,7 @@ Y = sapply(X[,1], mu) + sigma * rnorm(n)
 
 X = scale(X)
 
-llf = locally.linear.forest(X, Y - mean(Y), sample.fraction = frac, mtry = mtry, lambda = lambda, 
+llf = locally.linear.forest(X, Y - mean(Y), sample.fraction = frac, mtry = mtry, penalties = penalties, 
                             num.trees = 500, min.node.size = leaf.size, ci_group_size = 1)
 yhat = predict(llf) + mean(Y)
 error = sum((yhat-Y)**2)/n

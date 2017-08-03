@@ -33,7 +33,7 @@ public:
   static ForestPredictor locally_linear_predictor(uint num_threads,
                                                   const Data *data,
                                                   const Data *test_data,
-                                                  double lambda); 
+                                                  std::vector<double> lambda); 
 };
 
 
