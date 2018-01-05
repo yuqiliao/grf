@@ -13,10 +13,21 @@ else()
 endif()
 
 ## ======================================================================================##
+## Boost
+## ======================================================================================##
+find_package( Boost REQUIRED )
+if(Boost_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS})
+else(Boost_FOUND)
+  find_library(Boost boost PATHS /opt/local/lib)
+  include_directories(${Boost_LIBRARY_PATH})
+endif()
+
+## ======================================================================================##
 ## Compiler flags
 ## ======================================================================================##
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread -lboost_system -lboost_filesystem")
 
 
 ## ======================================================================================##
@@ -31,11 +42,13 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 endif()
 
+
 ## ======================================================================================##
 ## Subdirectories and source files
 ## ======================================================================================##
-include_directories(src test third_party)
-file(GLOB_RECURSE SOURCES src/*.cpp test/*.cpp)
+
+include_directories(src test third_party third_party/limbo)
+file(GLOB_RECURSE SOURCES src/*.cpp test/*.cpp third_party/*.cpp)
 
 ## ======================================================================================##
 ## Debug and release targets
