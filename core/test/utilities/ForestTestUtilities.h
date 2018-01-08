@@ -28,7 +28,10 @@ public:
 
   static void init_trainer(ForestTrainer& trainer,
                            bool honesty,
-                           uint ci_group_size);
+                           uint ci_group_size,
+                           uint min_node_size,
+                           uint mtry,
+                           double sample_fraction);
 };
 
 #endif //GRF_FORESTTESTUTILITIES_H

@@ -27,7 +27,7 @@ endif()
 ## Compiler flags
 ## ======================================================================================##
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread -lboost_system -lboost_filesystem")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread -lboost_system -lboost_filesystem -lnlopt -lm")
 
 
 ## ======================================================================================##

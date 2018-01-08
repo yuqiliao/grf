@@ -19,26 +19,26 @@
 #include "forest/ForestTrainer.h"
 
 void ForestTestUtilities::init_default_trainer(ForestTrainer &trainer) {
-  init_trainer(trainer, false, 1);
+  init_trainer(trainer, false, 1, 1, 4, 0.4);
 }
 
 void ForestTestUtilities::init_honest_trainer(ForestTrainer& trainer) {
-  init_trainer(trainer, true, 1);
+  init_trainer(trainer, true, 1, 1, 4, 0.4);
 }
 
 void ForestTestUtilities::init_trainer(ForestTrainer& trainer,
                                        bool honesty,
-                                       uint ci_group_size) {
-  uint mtry = 3;
-  uint num_trees = 50;
+                                       uint ci_group_size,
+                                       uint min_node_size,
+                                       uint mtry,
+                                       double sample_fraction) {
+  uint num_trees = 100;
   uint seed = 42;
   uint num_threads = 4;
-  uint min_node_size = 1;
   std::set<size_t> no_split_variables;
   std::string split_select_weights_file = "";
   bool sample_with_replacement = true;
   std::string sample_weights_file = "";
-  double sample_fraction = ci_group_size > 1 ? 0.35 : 0.7;
 
   trainer.init(mtry, num_trees, seed, num_threads,
                min_node_size, no_split_variables, split_select_weights_file,
