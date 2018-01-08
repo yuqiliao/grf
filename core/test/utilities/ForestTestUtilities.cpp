@@ -32,7 +32,7 @@ void ForestTestUtilities::init_trainer(ForestTrainer& trainer,
                                        uint min_node_size,
                                        uint mtry,
                                        double sample_fraction) {
-  uint num_trees = 100;
+  uint num_trees = 20;
   uint seed = 42;
   uint num_threads = 4;
   std::set<size_t> no_split_variables;

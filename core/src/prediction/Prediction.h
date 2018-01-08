@@ -45,7 +45,7 @@ public:
     return predictions.size();
   }
 
-  const PredictionValues& get_tree_variance() const {
+  const PredictionValues& get_prediction_values() const {
     return prediction_values;
   }
 

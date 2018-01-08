@@ -34,11 +34,7 @@ std::vector<Prediction> OptimizedPredictionCollector::collect_predictions(const 
 
   for (size_t sample = 0; sample < num_samples; ++sample) {
     std::vector<double> average_value;
-    std::vector<std::vector<double>> leaf_values;
-
-    if (ci_group_size > 1) {
-      leaf_values.resize(num_trees);
-    }
+    std::vector<std::vector<double>> leaf_values(num_trees);
 
     // Create a list of weighted neighbors for this sample.
     uint num_leaves = 0;
@@ -56,9 +52,7 @@ std::vector<Prediction> OptimizedPredictionCollector::collect_predictions(const 
       if (!prediction_values.empty(node)) {
         num_leaves++;
         add_prediction_values(node, prediction_values, average_value);
-        if (ci_group_size > 1) {
-          leaf_values[tree_index] = prediction_values.get_values(node);
-        }
+        leaf_values[tree_index] = prediction_values.get_values(node);
       }
     }
 

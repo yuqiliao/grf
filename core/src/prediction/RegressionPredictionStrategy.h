@@ -40,8 +40,9 @@ public:
       const PredictionValues& leaf_values,
       uint ci_group_size);
 
-private:
   static const std::size_t OUTCOME;
+
+private:
   ObjectiveBayesDebiaser bayes_debiaser;
 };
 

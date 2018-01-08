@@ -4,6 +4,7 @@
 #define USE_NLOPT
 #include <iostream>
 #include <limbo/limbo.hpp>
+#include <prediction/RegressionPredictionStrategy.h>
 
 #include "commons/utility.h"
 #include "forest/ForestPredictor.h"
@@ -18,7 +19,7 @@
 struct Params {
   struct bayes_opt_boptimizer : public limbo::defaults::bayes_opt_boptimizer {};
 
-  struct opt_gridsearch: public limbo::defaults::opt_gridsearch {};
+  //struct opt_gridsearch: public limbo::defaults::opt_gridsearch {};
   struct opt_nloptnograd : public limbo::defaults::opt_nloptnograd {
     BO_PARAM(double, fun_tolerance, 1e-6);
     BO_PARAM(double, xrel_tolerance, 1e-6);
@@ -31,10 +32,12 @@ struct Params {
 
   struct bayes_opt_bobase : public limbo::defaults::bayes_opt_bobase {};
   struct kernel_maternfivehalves : public limbo::defaults::kernel_maternfivehalves {};
-  struct init_randomsampling : public limbo::defaults::init_randomsampling {};
+  struct init_randomsampling : public limbo::defaults::init_randomsampling {
+    BO_PARAM(int, samples, 100);
+  };
 
   struct stop_maxiterations {
-    BO_PARAM(int, iterations, 500);
+    BO_PARAM(int, iterations, 50);
   };
 
   struct acqui_ucb : public limbo::defaults::acqui_ucb {};
@@ -51,11 +54,11 @@ struct ObjectiveFunction {
       outcome_index(outcome_index) {}
 
   Eigen::VectorXd operator()(const Eigen::VectorXd &x) const {
-    double alpha = x[0] / 2;
+    double alpha = 0.5 * x[0];
     uint ci_group_size = 1;
-    uint min_node_size = (uint) (x[1] * 100);
-    uint mtry = (uint) (x[2] * data->get_num_cols());
-    double sample_fraction = 0.20 + 0.8 * x[3];
+    uint min_node_size = (uint) (1 + x[1] * 999);
+    uint mtry = (uint) (1 + x[2] * data->get_num_cols());
+    double sample_fraction = 0.01 + 0.49 * x[3];
 
     // Train a regression forest, and make OOB predictions.
     ForestTrainer trainer = ForestTrainers::regression_trainer(data, outcome_index, alpha);
@@ -63,34 +66,51 @@ struct ObjectiveFunction {
                                       min_node_size, mtry, sample_fraction);
 
     Forest forest = trainer.train(data);
-    ForestPredictor predictor = ForestPredictors::regression_predictor(4, 1);
+    ForestPredictor predictor = ForestPredictors::regression_predictor(4, ci_group_size);
     std::vector<Prediction> predictions = predictor.predict_oob(forest, data);
 
     // Calculate and return the mean squared error.
-    double difference = 0;
+    double mean_squared_error = 0;
+    size_t predictions_evaluated = 0;
+
     for (size_t i = 0; i < predictions.size(); ++i) {
       double actual_outcome = data->get(i, outcome_index);
+      const Prediction& prediction = predictions[i];
+      double predicted_outcome = prediction.get_predictions().at(0);
 
-      double tree_mean = 0.0;
-      for (std::shared_ptr<Tree> tree : forest.get_trees()) {
+      // Add a bias correction based on the inter-tree prediction variance.
+      double tree_variance = 0.0;
+      const PredictionValues& prediction_values = prediction.get_prediction_values();
+      size_t num_oob_trees = 0;
 
-
+      for (size_t tree = 0; tree < prediction_values.get_num_nodes(); tree++) {
+        if (!prediction_values.empty(tree)) {
+          num_oob_trees++;
+          double tree_difference = predicted_outcome - prediction_values.get(tree, 0);
+          tree_variance += tree_difference * tree_difference;
+        }
       }
-      double predicted_outcome = predictions[i].get_predictions().at(0);
-      difference += (actual_outcome - predicted_outcome) * (actual_outcome - predicted_outcome);
+
+      if (num_oob_trees >= 3) {
+        predictions_evaluated++;
+        double difference = (actual_outcome - predicted_outcome);
+        mean_squared_error += difference * difference;
+        tree_variance /= num_oob_trees;
+        mean_squared_error -= 1.0 / (num_oob_trees - 1.0) * tree_variance;
+      }
     }
 
-    double mean_squared_error = difference / predictions.size();
-    return limbo::tools::make_vector(1 - mean_squared_error);
+    mean_squared_error /= predictions_evaluated;
+    return limbo::tools::make_vector(-mean_squared_error);
   }
 };
 
 TEST_CASE("bayes optimization completes without error", "[optimization]") {
     // we use the default acquisition function / model / stat / etc.
 
-  Data* data = load_data("test/forest/resources/performance_test.csv");
+  Data* data = load_data("test/forest/resources/high_signal_test.csv");
   size_t num_cols = data->get_num_cols();
-  size_t outcome_index = 10;
+  size_t outcome_index = num_cols - 1;
 
 //  typedef limbo::kernel::MaternFiveHalves<Params> Kernel_t;
 //  typedef limbo::mean::Data<Params> Mean_t;
@@ -104,9 +124,9 @@ TEST_CASE("bayes optimization completes without error", "[optimization]") {
   ObjectiveFunction objective(data, outcome_index);
   optimizer.optimize(objective);
 
-  std::cout << "Best alpha: " << optimizer.best_sample()[0] / 2 << std::endl
-            << " Best min_node_size: " << (uint) (optimizer.best_sample()[1] * 100) << std::endl
-            << " Best mtry: " << (uint) (optimizer.best_sample()[2] * num_cols) << std::endl
-            << " Best sample_fraction: " << 0.20 + 0.80 * optimizer.best_sample()[3] << std::endl
+  std::cout << "Best alpha: " << optimizer.best_sample()[0] * 0.5 << std::endl
+            << " Best min_node_size: " << (uint) (1 + optimizer.best_sample()[1] * 999) << std::endl
+            << " Best mtry: " << (uint) (1 + optimizer.best_sample()[2] * num_cols) << std::endl
+            << " Best sample_fraction: " << 0.01 + 0.49 * optimizer.best_sample()[3] << std::endl
             << " Best observation: " << optimizer.best_observation()(0) << std::endl;
 }
