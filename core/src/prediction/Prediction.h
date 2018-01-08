@@ -20,12 +20,14 @@
 
 #include <cstddef>
 #include <vector>
+#include "PredictionValues.h"
 
 class Prediction {
 public:
   Prediction(const std::vector<double>& predictions);
   Prediction(const std::vector<double>& predictions,
-             const std::vector<double>& variance_estimates);
+             const std::vector<double>& variance_estimates,
+             const PredictionValues& tree_variance);
 
   const std::vector<double>& get_predictions() const {
     return predictions;
@@ -43,9 +45,14 @@ public:
     return predictions.size();
   }
 
+  const PredictionValues& get_tree_variance() const {
+    return prediction_values;
+  }
+
 private:
   std::vector<double> predictions;
   std::vector<double> variance_estimates;
+  PredictionValues prediction_values;
 };
 
 

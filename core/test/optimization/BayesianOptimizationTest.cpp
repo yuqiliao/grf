@@ -16,34 +16,32 @@
 
 
 struct Params {
-    struct bayes_opt_boptimizer : public limbo::defaults::bayes_opt_boptimizer {};
+  struct bayes_opt_boptimizer : public limbo::defaults::bayes_opt_boptimizer {};
 
-
-    struct opt_gridsearch: public limbo::defaults::opt_gridsearch {};
+  struct opt_gridsearch: public limbo::defaults::opt_gridsearch {};
   struct opt_nloptnograd : public limbo::defaults::opt_nloptnograd {
     BO_PARAM(double, fun_tolerance, 1e-6);
     BO_PARAM(double, xrel_tolerance, 1e-6);
   };
 
-    struct kernel : public limbo::defaults::kernel {
-        BO_PARAM(double, noise, 0.001);
-    };
+  struct kernel : public limbo::defaults::kernel {
+    BO_PARAM(double, noise, 0.01);
+    BO_PARAM(double, optimize_noise, true);
+  };
 
-    struct bayes_opt_bobase : public limbo::defaults::bayes_opt_bobase {};
-    struct kernel_maternfivehalves : public limbo::defaults::kernel_maternfivehalves {};
-    struct init_randomsampling : public limbo::defaults::init_randomsampling {};
+  struct bayes_opt_bobase : public limbo::defaults::bayes_opt_bobase {};
+  struct kernel_maternfivehalves : public limbo::defaults::kernel_maternfivehalves {};
+  struct init_randomsampling : public limbo::defaults::init_randomsampling {};
 
-    struct stop_maxiterations {
-      BO_PARAM(int, iterations, 500);
-    };
+  struct stop_maxiterations {
+    BO_PARAM(int, iterations, 500);
+  };
 
-    struct acqui_ucb : public limbo::defaults::acqui_ucb {};
+  struct acqui_ucb : public limbo::defaults::acqui_ucb {};
 };
 
 struct ObjectiveFunction {
-  // number of input dimension (x.size())
   BO_PARAM(size_t, dim_in, 4);
-  // number of dimensions of the result (res.size())
   BO_PARAM(size_t, dim_out, 1);
 
   Data* data;
@@ -52,7 +50,6 @@ struct ObjectiveFunction {
       data(data),
       outcome_index(outcome_index) {}
 
-  // the function to be optimized
   Eigen::VectorXd operator()(const Eigen::VectorXd &x) const {
     double alpha = x[0] / 2;
     uint ci_group_size = 1;
@@ -73,6 +70,12 @@ struct ObjectiveFunction {
     double difference = 0;
     for (size_t i = 0; i < predictions.size(); ++i) {
       double actual_outcome = data->get(i, outcome_index);
+
+      double tree_mean = 0.0;
+      for (std::shared_ptr<Tree> tree : forest.get_trees()) {
+
+
+      }
       double predicted_outcome = predictions[i].get_predictions().at(0);
       difference += (actual_outcome - predicted_outcome) * (actual_outcome - predicted_outcome);
     }
